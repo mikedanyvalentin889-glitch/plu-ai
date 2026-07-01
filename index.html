@@ -3,743 +3,786 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plug AI Clone - Dating Assistant</title>
+    <title>Wing AI - Votre Cupidon Numérique</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#fef2f2', 100: '#fee2e2', 200: '#fecaca', 300: '#fca5a5',
+                            400: '#f87171', 500: '#ef4444', 600: '#dc2626', 700: '#b91c1c',
+                            800: '#991b1b', 900: '#7f1d1d',
+                        },
+                        accent: {
+                            50: '#fdf4ff', 100: '#fae8ff', 200: '#f5d0fe', 300: '#f0abfc',
+                            400: '#e879f9', 500: '#d946ef', 600: '#c026d3', 700: '#a21caf',
+                            800: '#86198f', 900: '#701a75',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root {
-            --bg-primary: #0a0a0f; --bg-secondary: #12121a; --bg-card: #1a1a2e; --bg-input: #16162a;
-            --accent: #7c3aed; --accent-light: #a78bfa;
-            --accent-gradient: linear-gradient(135deg, #7c3aed, #c026d3);
-            --text-primary: #f1f5f9; --text-secondary: #94a3b8; --text-muted: #64748b;
-            --success: #10b981; --warning: #f59e0b; --danger: #ef4444;
-            --border: rgba(124, 58, 237, 0.2); --glass: rgba(26, 26, 46, 0.8);
-        }
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; overflow-x: hidden;
-        }
-        .bg-gradient {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
-            background: radial-gradient(ellipse at 20% 20%, rgba(124,58,237,0.15) 0%, transparent 50%),
-                         radial-gradient(ellipse at 80% 80%, rgba(192,38,211,0.1) 0%, transparent 50%);
-            animation: bgPulse 8s ease-in-out infinite;
-        }
-        @keyframes bgPulse { 0%,100%{opacity:1} 50%{opacity:0.7} }
-        .particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; overflow: hidden; }
-        .particle { position: absolute; width: 4px; height: 4px; background: var(--accent-light); border-radius: 50%; opacity: 0.3; animation: float 15s infinite; }
-        @keyframes float { 0%,100%{transform:translateY(100vh) rotate(0deg);opacity:0} 10%{opacity:0.3} 90%{opacity:0.3} 100%{transform:translateY(-100vh) rotate(720deg);opacity:0} }
-        .header { padding: 1.5rem 2rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); background: var(--glass); backdrop-filter: blur(20px); position: sticky; top: 0; z-index: 100; }
-        .logo { display: flex; align-items: center; gap: 0.75rem; font-size: 1.5rem; font-weight: 800; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-        .logo-icon { width: 40px; height: 40px; background: var(--accent-gradient); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; -webkit-text-fill-color: white; }
-        .nav-tabs { display: flex; gap: 0.5rem; }
-        .nav-tab { padding: 0.6rem 1.2rem; border-radius: 10px; border: none; background: transparent; color: var(--text-secondary); font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 0.5rem; }
-        .nav-tab:hover { background: rgba(124,58,237,0.1); color: var(--text-primary); }
-        .nav-tab.active { background: var(--accent-gradient); color: white; box-shadow: 0 4px 15px rgba(124,58,237,0.4); }
-        .main-content { max-width: 900px; margin: 0 auto; padding: 2rem; }
-        .tab-content { display: none; animation: fadeIn 0.4s ease; }
-        .tab-content.active { display: block; }
-        @keyframes fadeIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
-        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 2rem; margin-bottom: 1.5rem; position: relative; overflow: hidden; }
-        .card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--accent-gradient); opacity:0; transition:opacity 0.3s; }
-        .card:hover::before { opacity:1; }
-        .card-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.75rem; }
-        .card-subtitle { color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1.5rem; }
-        .upload-area { border: 2px dashed var(--border); border-radius: 16px; padding: 3rem 2rem; text-align: center; cursor: pointer; transition: all 0.3s ease; background: var(--bg-input); position: relative; overflow: hidden; }
-        .upload-area:hover { border-color: var(--accent); background: rgba(124,58,237,0.05); }
-        .upload-area.dragover { border-color: var(--accent-light); background: rgba(124,58,237,0.1); transform: scale(1.02); }
-        .upload-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.7; }
-        .upload-text { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; }
-        .upload-hint { color: var(--text-muted); font-size: 0.85rem; }
-        #fileInput { display: none; }
-        .image-preview-container { margin-top: 1.5rem; display: none; }
-        .image-preview-container.show { display: block; animation: fadeIn 0.4s ease; }
-        .image-preview { max-width: 100%; max-height: 400px; border-radius: 12px; border: 1px solid var(--border); }
-        .text-input-area { width: 100%; min-height: 150px; background: var(--bg-input); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; color: var(--text-primary); font-size: 0.95rem; font-family: inherit; resize: vertical; transition: all 0.3s; }
-        .text-input-area:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(124,58,237,0.2); }
-        .text-input-area::placeholder { color: var(--text-muted); }
-        .btn { padding: 0.9rem 2rem; border-radius: 12px; border: none; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; }
-        .btn-primary { background: var(--accent-gradient); color: white; box-shadow: 0 4px 20px rgba(124,58,237,0.4); }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(124,58,237,0.5); }
-        .btn-primary:active { transform: translateY(0); }
-        .btn-secondary { background: var(--bg-input); color: var(--text-primary); border: 1px solid var(--border); }
-        .btn-secondary:hover { background: rgba(124,58,237,0.1); border-color: var(--accent); }
-        .btn-group { display: flex; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap; }
-        .loading-container { display: none; text-align: center; padding: 3rem; }
-        .loading-container.show { display: block; animation: fadeIn 0.3s ease; }
-        .spinner { width: 50px; height: 50px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .loading-text { color: var(--text-secondary); font-size: 0.95rem; }
-        .loading-dots::after { content: ''; animation: dots 1.5s steps(4,end) infinite; }
-        @keyframes dots { 0%{content:''} 25%{content:'.'} 50%{content:'..'} 75%{content:'...'} }
-        .results-container { display: none; margin-top: 1.5rem; }
-        .results-container.show { display: block; animation: fadeIn 0.5s ease; }
-        .result-item { background: var(--bg-input); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem; margin-bottom: 1rem; cursor: pointer; transition: all 0.3s ease; position: relative; overflow: hidden; }
-        .result-item::before { content:''; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--accent-gradient); opacity:0; transition:opacity 0.3s; }
-        .result-item:hover { border-color: var(--accent); transform: translateX(5px); background: rgba(124,58,237,0.08); }
-        .result-item:hover::before { opacity: 1; }
-        .result-item.copied { border-color: var(--success); background: rgba(16,185,129,0.1); }
-        .result-item.copied::before { background: var(--success); opacity: 1; }
-        .result-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--accent-light); margin-bottom: 0.5rem; }
-        .result-text { font-size: 1rem; line-height: 1.6; color: var(--text-primary); }
-        .result-meta { display: flex; gap: 1rem; margin-top: 0.75rem; font-size: 0.8rem; color: var(--text-muted); }
-        .result-tag { padding: 0.2rem 0.6rem; border-radius: 6px; background: rgba(124,58,237,0.15); color: var(--accent-light); font-size: 0.75rem; font-weight: 600; }
-        .chat-container { height: 500px; display: flex; flex-direction: column; background: var(--bg-secondary); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; }
-        .chat-messages { flex: 1; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
-        .chat-message { max-width: 80%; padding: 1rem 1.25rem; border-radius: 16px; font-size: 0.95rem; line-height: 1.5; animation: messageSlide 0.3s ease; }
-        @keyframes messageSlide { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-        .chat-message.user { align-self: flex-end; background: var(--accent-gradient); color: white; border-bottom-right-radius: 4px; }
-        .chat-message.ai { align-self: flex-start; background: var(--bg-input); color: var(--text-primary); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
-        .chat-input-area { padding: 1rem; border-top: 1px solid var(--border); display: flex; gap: 0.75rem; background: var(--bg-card); }
-        .chat-input { flex: 1; background: var(--bg-input); border: 1px solid var(--border); border-radius: 12px; padding: 0.9rem 1.2rem; color: var(--text-primary); font-size: 0.95rem; font-family: inherit; outline: none; transition: all 0.3s; }
-        .chat-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(124,58,237,0.2); }
-        .chat-input::placeholder { color: var(--text-muted); }
-        .chat-send-btn { width: 48px; height: 48px; border-radius: 12px; border: none; background: var(--accent-gradient); color: white; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; flex-shrink: 0; }
-        .chat-send-btn:hover { transform: scale(1.05); box-shadow: 0 4px 15px rgba(124,58,237,0.4); }
-        .mood-selector { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
-        .mood-btn { padding: 0.6rem 1.2rem; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-input); color: var(--text-secondary); font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.3s; }
-        .mood-btn:hover { border-color: var(--accent); color: var(--text-primary); }
-        .mood-btn.active { background: var(--accent-gradient); color: white; border-color: transparent; box-shadow: 0 4px 15px rgba(124,58,237,0.3); }
-        .bio-input { margin-bottom: 1.5rem; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
-        .stat-card { background: var(--bg-input); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; text-align: center; }
-        .stat-value { font-size: 1.5rem; font-weight: 800; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-        .stat-label { font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.25rem; }
-        .toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.5rem; display: flex; align-items: center; gap: 0.75rem; box-shadow: 0 10px 40px rgba(0,0,0,0.4); z-index: 1000; opacity: 0; transition: all 0.4s cubic-bezier(0.175,0.885,0.32,1.275); }
-        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-        .toast-icon { font-size: 1.2rem; }
-        .toast-text { font-weight: 600; font-size: 0.95rem; }
-        .hero { text-align: center; padding: 3rem 1rem; margin-bottom: 2rem; }
-        .hero h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-        .hero p { color: var(--text-secondary); font-size: 1.1rem; max-width: 500px; margin: 0 auto; }
-        .quick-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
-        .quick-action-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; cursor: pointer; transition: all 0.3s ease; text-align: center; }
-        .quick-action-card:hover { border-color: var(--accent); transform: translateY(-5px); box-shadow: 0 10px 30px rgba(124,58,237,0.2); }
-        .quick-action-icon { font-size: 2.5rem; margin-bottom: 1rem; }
-        .quick-action-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
-        .quick-action-desc { color: var(--text-secondary); font-size: 0.9rem; }
-        .typing-indicator { display: flex; gap: 4px; padding: 0.5rem 0; }
-        .typing-dot { width: 8px; height: 8px; background: var(--accent-light); border-radius: 50%; animation: typingBounce 1.4s ease-in-out infinite; }
-        .typing-dot:nth-child(2){animation-delay:0.2s} .typing-dot:nth-child(3){animation-delay:0.4s}
-        @keyframes typingBounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-10px)} }
-        @media (max-width:768px) {
-            .header { padding: 1rem; flex-direction: column; gap: 1rem; }
-            .nav-tabs { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-            .main-content { padding: 1rem; }
-            .card { padding: 1.25rem; }
-            .chat-container { height: 400px; }
-        }
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: var(--bg-primary); }
-        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--accent-light); }
+        body { background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%); min-height: 100vh; }
+        .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
+        .glass-card { background: rgba(255,255,255,0.07); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.12); transition: all 0.3s ease; }
+        .glass-card:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); transform: translateY(-2px); }
+        .gradient-text { background: linear-gradient(135deg, #f472b6, #a78bfa, #60a5fa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .message-bubble { position: relative; animation: slideIn 0.4s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .tone-btn.active { background: linear-gradient(135deg, #f472b6, #a78bfa); color: white; border-color: transparent; }
+        .lang-btn.active { background: rgba(255,255,255,0.15); border-color: #f472b6; color: #f472b6; }
+        .fade-in { animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .drop-zone { transition: all 0.3s ease; border: 2px dashed rgba(255,255,255,0.2); }
+        .drop-zone.dragover { border-color: #f472b6; background: rgba(244,114,182,0.1); }
+        .scroll-hidden::-webkit-scrollbar { display: none; }
+        .scroll-hidden { -ms-overflow-style: none; scrollbar-width: none; }
+        .typing-dots span { animation: typing 1.4s infinite; }
+        .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typing { 0%,60%,100% { opacity: 0.3; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-4px); } }
+        .confetti { position: fixed; pointer-events: none; z-index: 9999; }
+        .heart-beat { animation: heartbeat 1.5s ease-in-out infinite; }
+        @keyframes heartbeat { 0%,100% { transform: scale(1); } 14% { transform: scale(1.1); } 28% { transform: scale(1); } 42% { transform: scale(1.1); } }
     </style>
 </head>
-<body>
-    <div class="bg-gradient"></div>
-    <div class="particles" id="particles"></div>
-    <header class="header">
-        <div class="logo"><div class="logo-icon">⚡</div>Plug AI Clone</div>
-        <nav class="nav-tabs">
-            <button class="nav-tab active" data-tab="home"><span>🏠</span> Accueil</button>
-            <button class="nav-tab" data-tab="screenshot"><span>📸</span> Screenshot</button>
-            <button class="nav-tab" data-tab="pickup"><span>🔥</span> Pickup Lines</button>
-            <button class="nav-tab" data-tab="chat"><span>🤖</span> AI Coach</button>
-        </nav>
-    </header>
-    <main class="main-content">
-        <div class="tab-content active" id="tab-home">
-            <div class="hero">
-                <h1>Ton Assistant de Drague IA</h1>
-                <p>Analyse tes conversations, genere des reponses parfaites et deviens un pro du dating. 100% gratuit, 100% offline.</p>
-            </div>
-            <div class="quick-actions">
-                <div class="quick-action-card" onclick="switchTab('screenshot')"><div class="quick-action-icon">📸</div><div class="quick-action-title">Analyser une Conversation</div><div class="quick-action-desc">Upload un screenshot ou colle du texte pour obtenir des reponses intelligentes</div></div>
-                <div class="quick-action-card" onclick="switchTab('pickup')"><div class="quick-action-icon">🔥</div><div class="quick-action-title">Generer un Opener</div><div class="quick-action-desc">Cree des premiers messages captivants personnalises selon la bio</div></div>
-                <div class="quick-action-card" onclick="switchTab('chat')"><div class="quick-action-icon">🤖</div><div class="quick-action-title">Coach AI</div><div class="quick-action-desc">Discute avec ton coach personnel pour des conseils dating & seduction</div></div>
-            </div>
-            <div class="card">
-                <div class="card-title">📊 Statistiques</div>
-                <div class="card-subtitle">Ton activite sur l app</div>
-                <div class="stats-grid">
-                    <div class="stat-card"><div class="stat-value" id="stat-analyses">0</div><div class="stat-label">Analyses</div></div>
-                    <div class="stat-card"><div class="stat-value" id="stat-pickups">0</div><div class="stat-label">Pickup Lines</div></div>
-                    <div class="stat-card"><div class="stat-value" id="stat-messages">0</div><div class="stat-label">Messages Coach</div></div>
-                    <div class="stat-card"><div class="stat-value" id="stat-copied">0</div><div class="stat-label">Copies</div></div>
+<body class="text-white overflow-x-hidden">
+<canvas id="particles" class="fixed inset-0 pointer-events-none z-0"></canvas>
+
+<nav class="fixed top-0 left-0 right-0 z-50 glass">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center">
+                    <i class="fas fa-feather-alt text-white text-lg"></i>
                 </div>
+                <span class="text-xl font-bold font-display gradient-text">Wing AI</span>
+            </div>
+            <div class="hidden md:flex items-center gap-6">
+                <button onclick="showSection('home')" class="text-sm font-medium text-white/70 hover:text-white transition">Accueil</button>
+                <button onclick="showSection('generator')" class="text-sm font-medium text-white/70 hover:text-white transition">Generateur</button>
+                <button onclick="showSection('history')" class="text-sm font-medium text-white/70 hover:text-white transition">Historique</button>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="toggleLangMenu()" class="w-10 h-10 rounded-xl glass flex items-center justify-center hover:bg-white/10 transition">
+                    <i class="fas fa-globe text-white/70"></i>
+                </button>
             </div>
         </div>
-        <div class="tab-content" id="tab-screenshot">
-            <div class="card">
-                <div class="card-title">📸 Analyser une Conversation</div>
-                <div class="card-subtitle">Upload un screenshot de ta conversation ou colle le texte directement</div>
-                <div class="upload-area" id="uploadArea">
-                    <div class="upload-icon">📤</div>
-                    <div class="upload-text">Glisse-depose une image ici</div>
-                    <div class="upload-hint">ou clique pour selectionner un fichier (JPG, PNG, GIF)</div>
-                    <input type="file" id="fileInput" accept="image/*">
-                </div>
-                <div class="image-preview-container" id="imagePreviewContainer"><img class="image-preview" id="imagePreview" src="" alt="Preview"></div>
-                <div style="margin-top:1.5rem;"><div style="font-weight:600;margin-bottom:0.75rem;color:var(--text-secondary);">Ou colle le texte de la conversation :</div><textarea class="text-input-area" id="conversationText" placeholder="Exemple :
-Elle : Salut ! Tu fais quoi dans la vie ?
-Moi : Je suis developpeur, et toi ?
-Elle : Moi je suis photographe, j adore voyager !"></textarea></div>
-                <div class="btn-group">
-                    <button class="btn btn-primary" onclick="analyzeConversation()"><span>✨</span> Generer des Reponses</button>
-                    <button class="btn btn-secondary" onclick="clearScreenshot()"><span>🗑️</span> Effacer</button>
-                </div>
-            </div>
-            <div class="loading-container" id="loadingContainer"><div class="spinner"></div><div class="loading-text">L IA analyse la conversation<span class="loading-dots"></span></div></div>
-            <div class="results-container" id="resultsContainer">
-                <div class="card"><div class="card-title">💡 Reponses Suggerees</div><div class="card-subtitle">Clique sur une reponse pour la copier</div><div id="resultsList"></div></div>
-            </div>
+    </div>
+</nav>
+
+<div id="langMenu" class="fixed top-20 right-4 z-50 glass rounded-2xl p-2 hidden fade-in">
+    <button onclick="setLanguage('fr')" class="lang-btn w-full px-4 py-2 rounded-xl text-sm font-medium text-white/70 hover:text-white border border-transparent transition flex items-center gap-2 active" data-lang="fr"><span>🇫🇷</span> Francais</button>
+    <button onclick="setLanguage('en')" class="lang-btn w-full px-4 py-2 rounded-xl text-sm font-medium text-white/70 hover:text-white border border-transparent transition flex items-center gap-2" data-lang="en"><span>🇬🇧</span> English</button>
+    <button onclick="setLanguage('ht')" class="lang-btn w-full px-4 py-2 rounded-xl text-sm font-medium text-white/70 hover:text-white border border-transparent transition flex items-center gap-2" data-lang="ht"><span>🇭🇹</span> Kreyol</button>
+</div>
+
+<main class="relative z-10 pt-20">
+
+<!-- HERO -->
+<section id="home" class="min-h-screen flex items-center justify-center px-4">
+    <div class="max-w-4xl mx-auto text-center">
+        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-8">
+            <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+            <span class="text-sm text-white/70" id="heroBadge">100% Gratuit - Sans API</span>
         </div>
-        <div class="tab-content" id="tab-pickup">
-            <div class="card">
-                <div class="card-title">🔥 Generateur de Pickup Lines</div>
-                <div class="card-subtitle">Choisis le mood et entre la bio de la personne pour des openers personnalises</div>
-                <div style="margin-bottom:1rem;"><div style="font-weight:600;margin-bottom:0.75rem;color:var(--text-secondary);">Mood :</div>
-                    <div class="mood-selector" id="moodSelector">
-                        <button class="mood-btn active" data-mood="funny">😂 Drole</button>
-                        <button class="mood-btn" data-mood="smooth">😎 Smooth</button>
-                        <button class="mood-btn" data-mood="cute">🥰 Mignon</button>
-                        <button class="mood-btn" data-mood="bold">🔥 Audacieux</button>
-                        <button class="mood-btn" data-mood="intellectual">🧠 Intellectuel</button>
-                        <button class="mood-btn" data-mood="mysterious">🌙 Mysterieux</button>
+        <h1 class="text-5xl md:text-7xl font-bold font-display mb-6 leading-tight">
+            Ton <span class="gradient-text">Cupidon</span><br>Numerique
+        </h1>
+        <p class="text-lg md:text-xl text-white/60 mb-10 max-w-2xl mx-auto leading-relaxed" id="heroDesc">
+            Genere des messages parfaits pour Tinder, Bumble, Hinge... en Francais, Anglais ou Creole. Aucune cle API requise, tout fonctionne dans ton navigateur.
+        </p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <button onclick="showSection('generator')" class="group px-8 py-4 rounded-2xl bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold text-lg hover:shadow-2xl hover:shadow-pink-500/25 transition-all duration-300 flex items-center gap-3">
+                Commencer <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+            </button>
+            <button onclick="showDemo()" class="px-8 py-4 rounded-2xl glass text-white font-semibold text-lg hover:bg-white/10 transition-all flex items-center gap-3">
+                <i class="fas fa-play text-pink-400"></i> Voir la demo
+            </button>
+        </div>
+        <div class="mt-16 grid grid-cols-3 gap-8 max-w-lg mx-auto">
+            <div class="text-center"><div class="text-3xl font-bold gradient-text">3x</div><div class="text-sm text-white/50 mt-1">Plus de reponses</div></div>
+            <div class="text-center"><div class="text-3xl font-bold gradient-text">0</div><div class="text-sm text-white/50 mt-1">Cle API</div></div>
+            <div class="text-center"><div class="text-3xl font-bold gradient-text">3</div><div class="text-sm text-white/50 mt-1">Langues</div></div>
+        </div>
+    </div>
+</section>
+
+<!-- GENERATOR -->
+<section id="generator" class="hidden min-h-screen px-4 py-12">
+    <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-10">
+            <h2 class="text-3xl md:text-4xl font-bold font-display mb-3">Genere ton message parfait</h2>
+            <p class="text-white/60">Decris le profil ou colle une capture d'ecran</p>
+        </div>
+        <div class="grid lg:grid-cols-2 gap-8">
+            <!-- INPUT PANEL -->
+            <div class="space-y-6">
+                <div class="glass rounded-2xl p-6 space-y-4">
+                    <div>
+                        <label class="text-sm font-medium text-white/70 mb-2 block">Langue</label>
+                        <div class="flex gap-2 flex-wrap">
+                            <button onclick="setGenLang('fr')" class="lang-btn active px-4 py-2 rounded-xl border border-white/10 text-sm font-medium transition flex items-center gap-2" data-lang="fr"><span>🇫🇷</span> Francais</button>
+                            <button onclick="setGenLang('en')" class="lang-btn px-4 py-2 rounded-xl border border-white/10 text-sm font-medium transition flex items-center gap-2" data-lang="en"><span>🇬🇧</span> English</button>
+                            <button onclick="setGenLang('ht')" class="lang-btn px-4 py-2 rounded-xl border border-white/10 text-sm font-medium transition flex items-center gap-2" data-lang="ht"><span>🇭🇹</span> Kreyol</button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-white/70 mb-2 block">Ton</label>
+                        <div class="flex gap-2 flex-wrap">
+                            <button onclick="setTone('funny')" class="tone-btn active px-4 py-2 rounded-xl border border-white/10 text-sm font-medium transition" data-tone="funny">😂 Drole</button>
+                            <button onclick="setTone('romantic')" class="tone-btn px-4 py-2 rounded-xl border border-white/10 text-sm font-medium transition" data-tone="romantic">💕 Romantique</button>
+                            <button onclick="setTone('flirty')" class="tone-btn px-4 py-2 rounded-xl border border-white/10 text-sm font-medium transition" data-tone="flirty">😏 Coquin</button>
+                            <button onclick="setTone('smooth')" class="tone-btn px-4 py-2 rounded-xl border border-white/10 text-sm font-medium transition" data-tone="smooth">😎 Suave</button>
+                            <button onclick="setTone('deep')" class="tone-btn px-4 py-2 rounded-xl border border-white/10 text-sm font-medium transition" data-tone="deep">🧠 Profond</button>
+                        </div>
                     </div>
                 </div>
-                <div class="bio-input"><div style="font-weight:600;margin-bottom:0.75rem;color:var(--text-secondary);">Bio / Description :</div><textarea class="text-input-area" id="bioInput" placeholder="Exemple : Photographe passionnee, amoureuse de la nature et des voyages. J adore le cafe et les conversations profondes." style="min-height:100px;"></textarea></div>
-                <div class="btn-group">
-                    <button class="btn btn-primary" onclick="generatePickupLines()"><span>⚡</span> Generer des Openers</button>
-                    <button class="btn btn-secondary" onclick="document.getElementById('bioInput').value=''"><span>🗑️</span> Effacer</button>
+                <div class="glass rounded-2xl p-6">
+                    <label class="text-sm font-medium text-white/70 mb-2 block">Bio / Conversation du match</label>
+                    <textarea id="profileText" rows="6" class="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 transition resize-none" placeholder="Colle ici la bio de ton match, ou decris ce que tu sais d'eux..."></textarea>
+                </div>
+                <div class="glass rounded-2xl p-6">
+                    <label class="text-sm font-medium text-white/70 mb-2 block">Capture d'ecran (optionnel)</label>
+                    <div id="dropZone" class="drop-zone rounded-xl p-8 text-center cursor-pointer" onclick="document.getElementById('fileInput').click()">
+                        <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="handleFile(event)">
+                        <div id="uploadContent">
+                            <i class="fas fa-cloud-upload-alt text-4xl text-white/30 mb-3"></i>
+                            <p class="text-white/50 text-sm">Glisse une image ou clique pour upload</p>
+                            <p class="text-white/30 text-xs mt-1">PNG, JPG, WEBP</p>
+                        </div>
+                        <div id="previewContent" class="hidden">
+                            <img id="previewImg" class="max-h-48 mx-auto rounded-lg mb-3" src="" alt="Preview">
+                            <button onclick="event.stopPropagation(); removeImage()" class="text-sm text-pink-400 hover:text-pink-300 transition"><i class="fas fa-trash mr-1"></i> Retirer</button>
+                        </div>
+                    </div>
+                </div>
+                <button id="generateBtn" onclick="generateMessages()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold text-lg hover:shadow-2xl hover:shadow-pink-500/25 transition-all duration-300 flex items-center justify-center gap-3">
+                    <i class="fas fa-magic"></i> Generer des messages
+                </button>
+            </div>
+            <!-- RESULTS PANEL -->
+            <div class="glass rounded-2xl p-6 min-h-[600px] flex flex-col">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="font-semibold text-lg">Messages generes</h3>
+                    <button onclick="clearResults()" class="w-8 h-8 rounded-lg glass flex items-center justify-center hover:bg-white/10 transition" title="Effacer"><i class="fas fa-trash-alt text-white/50 text-xs"></i></button>
+                </div>
+                <div id="resultsArea" class="flex-1 space-y-4 overflow-y-auto scroll-hidden">
+                    <div id="emptyState" class="flex flex-col items-center justify-center h-full text-center py-20">
+                        <div class="w-20 h-20 rounded-full glass flex items-center justify-center mb-4"><i class="fas fa-comment-dots text-3xl text-white/20"></i></div>
+                        <p class="text-white/40 text-sm">Tes messages apparaitront ici</p>
+                    </div>
+                    <div id="loadingState" class="hidden flex flex-col items-center justify-center py-20">
+                        <div class="w-16 h-16 rounded-full border-4 border-white/10 border-t-pink-500 animate-spin mb-4"></div>
+                        <p class="text-white/60 text-sm">Wing AI reflechit...</p>
+                    </div>
                 </div>
             </div>
-            <div class="loading-container" id="pickupLoading"><div class="spinner"></div><div class="loading-text">L IA craft des openers parfaits<span class="loading-dots"></span></div></div>
-            <div class="results-container" id="pickupResults">
-                <div class="card"><div class="card-title">🎯 Pickup Lines Personnalisees</div><div class="card-subtitle">Clique pour copier ton favori</div><div id="pickupList"></div></div>
-            </div>
         </div>
-        <div class="tab-content" id="tab-chat">
-            <div class="card"><div class="card-title">🤖 AI Dating Coach</div><div class="card-subtitle">Pose toutes tes questions sur le dating, la seduction et les relations</div></div>
-            <div class="chat-container">
-                <div class="chat-messages" id="chatMessages"><div class="chat-message ai">Salut ! Je suis ton AI Dating Coach. 🎯
+    </div>
+</section>
 
-Je peux t aider avec :
-• Des conseils pour tes conversations
-• L analyse de tes echanges
-• Des strategies de seduction
-• De la confiance en toi
-• Des idees de rendez-vous
-
-Qu est-ce qui t amene aujourd hui ?</div></div>
-                <div class="chat-input-area"><input type="text" class="chat-input" id="chatInput" placeholder="Ecris ton message..." onkeypress="if(event.key==='Enter') sendChatMessage()"><button class="chat-send-btn" onclick="sendChatMessage()">➤</button></div>
-            </div>
+<!-- HISTORY -->
+<section id="history" class="hidden min-h-screen px-4 py-12">
+    <div class="max-w-4xl mx-auto">
+        <div class="text-center mb-10">
+            <h2 class="text-3xl md:text-4xl font-bold font-display mb-3">Historique</h2>
+            <p class="text-white/60">Tes messages precedents</p>
         </div>
-    </main>
-    <div class="toast" id="toast"><span class="toast-icon">✅</span><span class="toast-text" id="toastText">Copie dans le presse-papiers !</span></div>
+        <div id="historyList" class="space-y-4"></div>
+        <div id="noHistory" class="text-center py-20">
+            <i class="fas fa-history text-4xl text-white/20 mb-4"></i>
+            <p class="text-white/40">Aucun message dans l'historique</p>
+        </div>
+    </div>
+</section>
+</main>
+
+<div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 glass px-6 py-3 rounded-xl text-sm font-medium text-white/80 opacity-0 pointer-events-none transition-all duration-300 z-50">
+    <span id="toastText"></span>
+</div>
+
+
 <script>
-let currentMood = 'funny';
-let stats = {
-    analyses: parseInt(localStorage.getItem('plugai_analyses') || '0'),
-    pickups: parseInt(localStorage.getItem('plugai_pickups') || '0'),
-    messages: parseInt(localStorage.getItem('plugai_messages') || '0'),
-    copied: parseInt(localStorage.getItem('plugai_copied') || '0')
-};
+// ========== STATE ==========
+let currentLang = 'fr';
+let currentGenLang = 'fr';
+let currentTone = 'funny';
+let uploadedImage = null;
+let messageHistory = JSON.parse(localStorage.getItem('wingHistory') || '[]');
 
-function createParticles() {
-    const container = document.getElementById('particles');
-    for (let i = 0; i < 20; i++) {
-        const particle = document.createElement('div');
-        particle.className = 'particle';
-        particle.style.left = Math.random() * 100 + '%';
-        particle.style.animationDelay = Math.random() * 15 + 's';
-        particle.style.animationDuration = (10 + Math.random() * 10) + 's';
-        container.appendChild(particle);
+// ========== TRANSLATIONS ==========
+const t = {
+    fr: {
+        heroBadge: '100% Gratuit - Sans API', heroTitle1: 'Ton', heroTitle2: 'Cupidon', heroTitle3: 'Numerique',
+        heroDesc: 'Genere des messages parfaits pour Tinder, Bumble, Hinge... en Francais, Anglais ou Creole. Aucune cle API requise, tout fonctionne dans ton navigateur.',
+        startBtn: 'Commencer', demoBtn: 'Voir la demo', stat1: 'Plus de reponses', stat2: 'Cle API', stat3: 'Langues',
+        genTitle: 'Genere ton message parfait', genDesc: 'Decris le profil ou colle une capture d'ecran',
+        langLabel: 'Langue', toneLabel: 'Ton', toneFunny: 'Drole', toneRomantic: 'Romantique', toneFlirty: 'Coquin',
+        toneSmooth: 'Suave', toneDeep: 'Profond', textLabel: 'Bio / Conversation du match',
+        textPlaceholder: 'Colle ici la bio de ton match, ou decris ce que tu sais d'eux...',
+        imageLabel: 'Capture d'ecran (optionnel)', dropText: 'Glisse une image ou clique pour upload',
+        removeImg: 'Retirer', generateBtn: 'Generer des messages', resultsTitle: 'Messages generes',
+        emptyText: 'Tes messages apparaitront ici', loadingText: 'Wing AI reflechit...',
+        historyTitle: 'Historique', historyDesc: 'Tes messages precedents', noHistory: 'Aucun message dans l'historique',
+        copied: 'Copie !', generateFirst: 'Decris d'abord le profil de ton match !',
+        demoBio: 'Sarah, 26 ans. Aime les chats, le cafe, voyager et la musique indie. Bio: "Probablement en train de boire un cafe | Amoureuse des chats | Fan de Tame Impala | Cherche quelqu'un pour explorer le monde"'
+    },
+    en: {
+        heroBadge: '100% Free - No API Key', heroTitle1: 'Your', heroTitle2: 'Digital', heroTitle3: 'Cupid',
+        heroDesc: 'Generate perfect messages for Tinder, Bumble, Hinge... in English, French or Creole. No API key needed, everything runs in your browser.',
+        startBtn: 'Get Started', demoBtn: 'Watch Demo', stat1: 'More replies', stat2: 'API Key', stat3: 'Languages',
+        genTitle: 'Generate your perfect message', genDesc: 'Describe the profile or paste a screenshot',
+        langLabel: 'Language', toneLabel: 'Tone', toneFunny: 'Funny', toneRomantic: 'Romantic', toneFlirty: 'Flirty',
+        toneSmooth: 'Smooth', toneDeep: 'Deep', textLabel: 'Bio / Match Conversation',
+        textPlaceholder: 'Paste your match's bio here, or describe what you know about them...',
+        imageLabel: 'Screenshot (optional)', dropText: 'Drop an image or click to upload',
+        removeImg: 'Remove', generateBtn: 'Generate Messages', resultsTitle: 'Generated Messages',
+        emptyText: 'Your messages will appear here', loadingText: 'Wing AI is thinking...',
+        historyTitle: 'History', historyDesc: 'Your previous messages', noHistory: 'No messages in history',
+        copied: 'Copied!', generateFirst: 'Describe your match's profile first!',
+        demoBio: 'Sarah, 26. Loves cats, coffee, traveling and indie music. Bio: "Probably drinking coffee | Cat lover | Tame Impala fan | Looking for someone to explore the world with"'
+    },
+    ht: {
+        heroBadge: '100% Gratis - San API', heroTitle1: 'Cupidon', heroTitle2: 'Digital', heroTitle3: 'Ou',
+        heroDesc: 'Jenere mesaj pafè pou Tinder, Bumble, Hinge... an Kreyòl, Franse oswa Anglè. Pa gen kle API, tout mache nan navigatè ou a.',
+        startBtn: 'Kòmanse', demoBtn: 'Gade Demo', stat1: 'Plis repons', stat2: 'Kle API', stat3: 'Lang',
+        genTitle: 'Jenere mesaj pafè ou a', genDesc: 'Dekri pwofil la oswa kole yon screenshot',
+        langLabel: 'Lang', toneLabel: 'Ton', toneFunny: 'Komik', toneRomantic: 'Romantik', toneFlirty: 'Coquin',
+        toneSmooth: 'Suave', toneDeep: 'Pwofon', textLabel: 'Bio / Konvèsasyon match la',
+        textPlaceholder: 'Kole bio match ou a isit la, oswa dekri sa ou konnen sou li...',
+        imageLabel: 'Screenshot (opsyonèl)', dropText: 'Glise yon imaj oswa klike pou upload',
+        removeImg: 'Retire', generateBtn: 'Jenere mesaj yo', resultsTitle: 'Mesaj ki jenere yo',
+        emptyText: 'Mesaj ou yo ap parèt isit la', loadingText: 'Wing AI ap reflechi...',
+        historyTitle: 'Istwa', historyDesc: 'Mesaj ou te fè anvan yo', noHistory: 'Pa gen mesaj nan istwa a',
+        copied: 'Kopye!', generateFirst: 'Dekri pwofil match ou a anvan!',
+        demoBio: 'Sarah, 26 ane. Renmen chat, kafe, vwayaje ak mizik indie. Bio: "Pwobableman ap bwè kafe | Renmen chat | Fanatik Tame Impala | Ap chache yon moun pou eksplore mond lan ansanm"'
     }
-}
-createParticles();
-
-function switchTab(tabName) {
-    document.querySelectorAll('.nav-tab').forEach(tab => {
-        tab.classList.toggle('active', tab.dataset.tab === tabName);
-    });
-    document.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.toggle('active', content.id === 'tab-' + tabName);
-    });
-    updateStats();
-}
-document.querySelectorAll('.nav-tab').forEach(tab => {
-    tab.addEventListener('click', () => switchTab(tab.dataset.tab));
-});
-
-function updateStats() {
-    document.getElementById('stat-analyses').textContent = stats.analyses;
-    document.getElementById('stat-pickups').textContent = stats.pickups;
-    document.getElementById('stat-messages').textContent = stats.messages;
-    document.getElementById('stat-copied').textContent = stats.copied;
-}
-updateStats();
-function saveStats() {
-    localStorage.setItem('plugai_analyses', stats.analyses);
-    localStorage.setItem('plugai_pickups', stats.pickups);
-    localStorage.setItem('plugai_messages', stats.messages);
-    localStorage.setItem('plugai_copied', stats.copied);
-}
-
-const uploadArea = document.getElementById('uploadArea');
-const fileInput = document.getElementById('fileInput');
-const imagePreview = document.getElementById('imagePreview');
-const imagePreviewContainer = document.getElementById('imagePreviewContainer');
-
-uploadArea.addEventListener('click', () => fileInput.click());
-uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
-uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
-uploadArea.addEventListener('drop', (e) => {
-    e.preventDefault(); uploadArea.classList.remove('dragover');
-    const files = e.dataTransfer.files;
-    if (files.length > 0) handleFile(files[0]);
-});
-fileInput.addEventListener('change', (e) => {
-    if (e.target.files.length > 0) handleFile(e.target.files[0]);
-});
-function handleFile(file) {
-    if (!file.type.startsWith('image/')) { showToast('Veuillez selectionner une image', 'error'); return; }
-    const reader = new FileReader();
-    reader.onload = (e) => { imagePreview.src = e.target.result; imagePreviewContainer.classList.add('show'); };
-    reader.readAsDataURL(file);
-}
-function clearScreenshot() {
-    fileInput.value = ''; imagePreview.src = ''; imagePreviewContainer.classList.remove('show');
-    document.getElementById('conversationText').value = '';
-    document.getElementById('resultsContainer').classList.remove('show');
-}
-
-const responseDatabase = {
-    greetings: ["Salut ! Ca va ? 😊","Hey ! Ravie de te parler ✨","Coucou ! Comment ca va aujourd hui ?","Salut toi ! Tu fais quoi de beau ?"],
-    work: ["Ah c est cool ! Tu aimes ce que tu fais ?","Sympa comme metier ! C est passionnant ?","Interessant ! Tu l as choisi comment ce metier ?","Genial ! Et dans tes reves, tu ferais quoi ?"],
-    hobbies: ["Ca a l air genial ! Tu pratiques depuis longtemps ?","J adore ! Tu pourrais m apprendre ? 😄","C est trop cool comme passion ! Tu as des projets dans ce domaine ?","Waouh ! Ca demande beaucoup de temps ?"],
-    travel: ["Ah les voyages ! Ton pays prefere ?","Je reve d y aller ! Tu as des photos ?","C est genial comme experience ! Prochaine destination ?","Tu preferes plage ou montagne ? 🏖️⛰️"],
-    food: ["Mmm ca donne faim ! Ton plat prefere ?","Tu cuisines aussi ou juste tu manges ? 😄","On devrait aller tester un resto ensemble !","Tu es plutot sucre ou sale ?"],
-    music: ["Trop bien ! Ton artiste du moment ?","On a les memes gouts ! Tu vas a des concerts ?","Tu joues d un instrument ?","Si tu devais choisir un genre pour la vie, ce serait lequel ?"],
-    movies: ["Bonne idee ! Tu preferes quel genre ?","On devrait regarder un film ensemble !","Tu es plutot Netflix ou cinema ?","Ton film prefere de tous les temps ?"],
-    sports: ["Sportif/sportive ! Tu fais quoi comme sport ?","Tu regardes des matchs aussi ou juste tu pratiques ?","Ton equipe preferee ?","Tu preferes faire du sport seul ou a plusieurs ?"],
-    books: ["Lecteur/lectrice ! Ton livre prefere ?","Tu lis quoi en ce moment ?","Plutot roman ou developpement personnel ?","Tu as une bibliotheque chez toi ? 📚"],
-    default: [
-        "Interessant ! Dis-moi en plus 😊","J aime bien apprendre a te connaitre !","Et sinon, tu fais quoi de tes week-ends ?","Tu as des projets pour bientot ?",
-        "Si tu pouvais avoir un super pouvoir, ce serait lequel ?","Tu es plutot matinal ou nocturne ? 🌙","Ton endroit prefere dans la ville ?","Tu as un animal de compagnie ? 🐱🐶"
-    ],
-    flirty: [
-        "Tu sais, je trouve que nos conversations passent trop vite...","Si tu etais un emoji, tu serais definitivement le 🔥",
-        "On devrait continuer cette conversation autour d un verre, non ? 🍸","Tu as un sourire qui se voit meme a travers tes messages 😏",
-        "Je parie que tu es encore plus charmante en personne","Tu me donnes envie de sortir de ma zone de confort",
-        "Si la conversation etait un sport, on serait deja en finale 🏆"
-    ],
-    deep: [
-        "C est une belle facon de voir les choses. Tu as toujours pense comme ca ?",
-        "J apprecie ta perspective. C est rare de rencontrer quelqu un qui reflechit autant",
-        "Tu as l air d etre quelqu un de profond. J aime ca",
-        "C est exactement le genre de conversation que j apprecie",
-        "Tu m intrigues. Il y a beaucoup plus chez toi que ce qu on voit au premier abord"
-    ],
-    funny: [
-        "Je viens de realiser que tu es probablement la personne la plus drole que je connaisse... et je connais mon chat 😹",
-        "Si nos conversations etaient un film, ce serait un blockbuster",
-        "Tu me fais rire, c est un super pouvoir ca !",
-        "On devrait faire un podcast, on serait incroyables",
-        "Je parie que tu es la star des soirees entre amis 🌟"
-    ],
-    confidence: [
-        "J adore ton assurance, c est super attirant","Tu as une energie vraiment positive, ca se sent a travers l ecran",
-        "Tu sais ce que tu veux, j apprecie ca chez quelqu un","Ton attitude est rafraichissante, ne change jamais",
-        "Tu as ce petit quelque chose qui fait la difference ✨"
-    ]
 };
 
-const pickupDatabase = {
-    funny: [
-        "Es-tu un clavier ? Parce que tu es mon type ! ⌨️😂","Je ne suis pas photographe, mais je peux nous imaginer ensemble 📸",
-        "Es-tu un WiFi ? Parce que je ressens une connexion entre nous 📶","Tu dois etre fatiguee, parce que tu trottes dans ma tete toute la journee 🏃‍♀️",
-        "Si tu etais un legume, tu serais un cutecumber 🥒","Es-tu un dictionnaire ? Parce que tu ajoutes du sens a ma vie 📖",
-        "Je ne suis pas magicien, mais je peux faire disparaitre ton celibat 🎩✨","Es-tu un feu rouge ? Parce que tu me fais stopper net 🚦",
-        "Si etre sexy etait un crime, tu passerais la vie en prison 🚔","Es-tu un GPS ? Parce que je me suis perdu dans tes yeux 🗺️"
-    ],
-    smooth: [
-        "Je ne sais pas ce qui brille le plus, tes yeux ou ton sourire ✨","Tu as l air d etre le genre de personne qui rend chaque jour meilleur",
-        "Si la beaute etait une seconde, tu serais une eternite","Je ne crois pas au coup de foudre, mais tu viens de me faire douter ⚡",
-        "Tu as ce genre de presence qui change l atmosphere d une piece",
-        "Je ne suis pas sur de ce que je cherche, mais je pense que ca pourrait etre toi",
-        "Il y a quelque chose chez toi qui me fait vouloir en savoir plus",
-        "Tu es le genre de personne dont on se souvient longtemps apres avoir dit au revoir",
-        "Si le charme etait une monnaie, tu serais milliardaire 💎",
-        "Je ne sais pas ce que tu fais ce weekend, mais j aimerais bien en faire partie"
-    ],
-    cute: [
-        "Tu as un sourire qui illumine tout l ecran, j imagine pas en vrai ☀️","Si le bonheur avait un visage, il ressemblerait probablement au tien",
-        "Tu sembles etre le genre de personne qui rend les journees pluvieuses ensoleillees 🌈",
-        "J ai l impression que discuter avec toi serait comme boire un chocolat chaud un dimanche matin ☕",
-        "Tu as l air douce et gentille, deux qualites sous-estimees de nos jours",
-        "Si les etoiles brillaient autant que toi, on n aurait jamais besoin de lumiere 🌟",
-        "Tu as ce petit truc qui fait qu on veut te connaitre, c est rare",
-        "Je parie que tu as un rire contagieux, j aimerais bien l entendre",
-        "Tu sembles etre une personne avec un beau coeur, c est precieux 💜",
-        "Si la gentillesse etait visible, tu brillerais dans le noir"
-    ],
-    bold: [
-        "On va pas se mentir, tu m as tape dans l oeil des la premiere photo 🔥",
-        "Je ne suis pas bon a faire la premiere approche, mais pour toi j ai fait une exception",
-        "Tu es exactement le genre de personne pour qui je telecharge cette appli",
-        "Je ne sais pas si c est ton sourire ou ton regard, mais tu m as eu",
-        "Si tu cherches quelqu un d authentique, je crois que tu viens de le trouver",
-        "Je ne suis pas ici pour perdre du temps, et toi non plus apparemment",
-        "Tu es le genre de personne qui me donne envie de prendre des risques",
-        "Je ne sais pas ce que tu fais ce soir, mais ca devrait etre avec moi",
-        "Tu as ce feu dans les yeux qui me dit qu on va bien s entendre 🔥",
-        "Je ne suis pas sur de ce qui m attire le plus chez toi, mais je veux le decouvrir"
-    ],
-    intellectual: [
-        "Si tu pouvais diner avec n importe quelle personne vivante ou morte, ce serait qui ?",
-        "Je parie que tu as des opinions fascinantes sur plein de sujets",
-        "Quel livre a change ta facon de voir le monde ? 📚",
-        "Si tu devais resumer ta philosophie de vie en une phrase, ce serait quoi ?",
-        "Tu sembles etre le genre de personne avec qui on peut parler pendant des heures sans s ennuyer",
-        "Quelle est la chose la plus interessante que tu aies apprise recemment ?",
-        "Je suis curieux de savoir ce qui te passionne vraiment dans la vie",
-        "Si tu pouvais maitriser une nouvelle competence instantanement, ce serait laquelle ?",
-        "Tu as l air d etre quelqu un qui pense avant de parler, j apprecie ca",
-        "Quel est le sujet sur lequel tu pourrais parler pendant des heures ?"
-    ],
-    mysterious: [
-        "Il y a quelque chose chez toi que je n arrive pas a cerner... et j aime ca 🌙",
-        "Tu sembles etre le genre de personne qui a des histoires fascinantes a raconter",
-        "Je parie que tu caches plein de surprises derriere ce profil",
-        "Tu as ce regard qui dit il y a plus que ce que tu vois",
-        "Si tu etais un roman, tu serais celui qu on ne peut pas lacher",
-        "Je ne sais pas grand-chose de toi, mais j ai envie de tout savoir",
-        "Tu as cette aura mysterieuse qui attire l attention sans chercher",
-        "Si les secrets avaient un visage, ils ressembleraient probablement au tien",
-        "Tu sembles etre une enigme interessante, j adore les defis 🧩",
-        "Il y a quelque chose de captivant chez toi, et je ne sais pas encore ce que c est"
-    ]
-};
-
-const contextKeywords = {
-    greetings: ['salut','coucou','hey','bonjour','hello','yo','wesh'],
-    work: ['travail','metier','boulot','job','pro','carriere','etudes','ecole','universite','boss','entreprise','startup','developpeur','ingenieur','medecin','avocat','prof','enseignant'],
-    hobbies: ['hobby','passion','loisir','sport','danse','peinture','dessin','musique','guitare','piano','cuisine','jardinage','photographie','photo'],
-    travel: ['voyage','voyager','pays','ville','avion','train','roadtrip','vacances','decouvrir','explorer','monde','paysage'],
-    food: ['manger','cuisine','restaurant','cafe','pizza','sushi','gastronomie','chef','recette','dessert','gateau','vin'],
-    music: ['musique','chanson','concert','festival','spotify','playlist','rap','rock','pop','jazz','classique','chanteur','artiste'],
-    movies: ['film','cinema','serie','netflix','movie','acteur','realisateur','thriller','comedie','horreur','documentaire'],
-    sports: ['sport','football','basket','tennis','course','musculation','fitness','yoga','natation','velo','gym'],
-    books: ['livre','lecture','roman','auteur','bibliotheque','kindle','poesie','thriller','fantastique','lire']
-};
-
-function showToast(message, type) {
-    const toast = document.getElementById('toast');
-    const toastText = document.getElementById('toastText');
-    const toastIcon = toast.querySelector('.toast-icon');
-    toastText.textContent = message;
-    toastIcon.textContent = type === 'error' ? '❌' : '✅';
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 3000);
-}
-
-function copyToClipboard(text, element) {
-    navigator.clipboard.writeText(text).then(() => {
-        showToast('Copie dans le presse-papiers !');
-        if (element) {
-            element.classList.add('copied');
-            setTimeout(() => element.classList.remove('copied'), 2000);
-        }
-        stats.copied++;
-        saveStats();
-        updateStats();
-    });
-}
-
-function shuffleArray(array) {
-    const arr = [...array];
-    for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
+// ========== MESSAGE TEMPLATES DATABASE ==========
+const messageDB = {
+    fr: {
+        funny: [
+            "Salut ! Je vois que tu aimes {topic}. Tu sais ce qui est encore mieux ? Un {topic} partage avec quelqu'un qui a un humour aussi douteux que le mien 😄",
+            "Okay, j'avoue, ta bio m'a fait sourire. Et moi, je fais sourire les gens... quand je ne tombe pas dans l'escalator du metro. On se fait un cafe pour comparer nos talents d'impro ?",
+            "Alors comme ca tu es fan de {topic} ? Moi aussi, mais attention, je suis le genre de personne qui chante faux dans la douche. Tu prends le risque ? 🎤",
+            "Je viens de lire ta bio et j'ai deux options : soit je te fais une blague nulle sur {topic}, soit on se rencontre et je te la fais en vrai. La deuxieme option inclut un cafe, donc c'est mieux.",
+            "T'es la preuve vivante que les gens cool existent encore. Moi je suis juste la preuve que les gens qui tombent en marchant existent. Match parfait, non ? 😂",
+            "Si tu etais un plat, tu serais probablement quelque chose d'epice. Moi je serais le dessert un peu loufoque qui va avec. On fait le menu ensemble ?",
+            "J'ai une question tres serieuse : prefere-tu {topic} le matin ou le soir ? Parce que moi, je prefere toi... a n'importe quelle heure. Oui, c'etait nul, mais au moins c'etait sincere 😅",
+            "On dirait que tu as un super sens de l'humour (ou alors tu risques d'en avoir un apres m'avoir lu). Defi : me faire rire en retour. T'es partante ?",
+            "Je ne suis pas photographe, mais je peux deja nous voir ensemble. Bon, c'est un peu creepy dit comme ca... remplacons par : tu veux qu'on cree de vrais souvenirs ? 📸",
+            "Entre toi et moi, il y a une connection WiFi. Le probleme, c'est que je suis un peu en 3G niveau drague. Tu m'aides a passer en 5G ? 😎"
+        ],
+        romantic: [
+            "J'ai lu ta bio et j'ai senti quelque chose de different. Pas le coup de foudre Hollywoodien, mais cette envie de connaitre l'histoire derriere chaque mot que tu as ecrit. Ca te dit qu'on ecrive la suite ensemble ?",
+            "Tu sais, quand je regarde ton profil, je ne vois pas juste des photos. Je vois des moments, des reves, des passions. Et j'aimerais tellement etre celui avec qui tu les partages.",
+            "Il y a des rencontres qui ne changent pas la vie, mais qui la rendent plus belle. J'ai l'impression que la notre pourrait etre de celles-la. Tu veux qu'on verifie ?",
+            "J'adore la facon dont tu parles de {topic}. Ca se voit que ca vient du coeur. Moi, ce qui me parle le plus en ce moment, c'est l'idee de decouvrir quelqu'un de special. Et je pense que ca pourrait etre toi.",
+            "On dit que les belles histoires commencent par un hasard. Moi je prefere croire qu'elles commencent par un clic, puis un message, puis un cafe, puis... on verra. Tu me laisses te raconter la suite ?",
+            "Je ne sais pas encore qui tu es vraiment, mais j'ai envie de le savoir. Pas juste ton nom ou ton age, mais ce qui te fait sourire le matin, ce qui te rend triste le soir. Tu me laisses entrer dans ton monde ?",
+            "Il y a quelque chose de doux dans la facon dont tu presentes ta vie. Ca donne envie d'etre une partie de cette douceur. On se laisse le temps de se decouvrir ?",
+            "Je ne cherche pas la perfection, je cherche la connexion. Et quand je te lis, j'ai l'impression qu'elle est la, a portee de message. Tu sens la meme chose ?",
+            "Les etoiles s'alignent parfois de drole de facon. Aujourd'hui, elles m'ont fait tomber sur ton profil. Demain, peut-etre qu'elles nous feront tomber dans les bras l'un de l'autre. On leur donne une chance ? ✨",
+            "Je ne sais pas si c'est le destin ou l'algorithme, mais je suis content d'etre la. Et je serais encore plus content de savoir que toi aussi. Un premier pas ensemble ?"
+        ],
+        flirty: [
+            "Je ne suis pas magicien, mais je peux deja voir qu'on va bien s'entendre. Et si on testait mes pouvoirs de divination autour d'un verre ? 🍷",
+            "Entre nous, je pense qu'il y a une alchimie. Le genre qui fait que tu souris en lisant ce message. Avoue, tu souris, hein ? 😏",
+            "Je ne suis pas photographe, mais je peux deja nous imaginer ensemble. Et franchement, on ferait un beau couple. Tu ne trouves pas ?",
+            "Tu sais ce qui est dangereux chez toi ? C'est que tu donnes envie de passer du temps avec toi. Beaucoup de temps. Genre... toute la soiree. Et peut-etre plus. Tu prends le risque ?",
+            "J'ai une theorie : les meilleures histoires commencent par un message un peu audacieux. Alors voila le mien : je te trouve irresistible, et j'aimerais te le dire en face. Cafe, ce soir ?",
+            "Si le charme etait un crime, tu serais en prison a vie. Heureusement pour nous deux, ce n'est pas le cas. On se retrouve ou ? 😘",
+            "Je ne suis pas bon en maths, mais je sais que toi + moi = une soiree memorable. Tu veux qu'on verifie l'equation ?",
+            "Il y a deux types de personnes : celles qui font battre le coeur, et celles qui le font s'arreter. Toi, tu es la troisieme option : celle qui le fait battre plus fort. Tu me laisses te le prouver ?",
+            "Je ne suis pas sure que Tinder soit fait pour trouver l'amour, mais quand je te vois, j'ai envie de faire une exception. Tu m'aides a tester cette theorie ?",
+            "On devrait arreter de se parler ici et commencer a se parler... ailleurs. Genre, dans un endroit ou je peux te regarder dans les yeux pendant que je te dis a quel point tu es belle. T'es partante ?"
+        ],
+        smooth: [
+            "J'ai parcouru pas mal de profils, mais le tien a quelque chose de different. Une authenticite rare. Ca te dirait qu'on echange nos vraies histoires autour d'un cafe ?",
+            "Tu as l'air d'etre le genre de personne avec qui on peut parler pendant des heures sans voir le temps passer. Moi, je suis le genre de personne qui aime ca. Coincidence ? Je ne crois pas.",
+            "Je ne suis pas du genre a envoyer des messages generiques. Quand je te lis, j'ai envie de savoir plus. Pas juste ce que tu aimes, mais pourquoi tu aimes. Tu me laisses decouvrir ?",
+            "Il y a une elegance dans la facon dont tu presentes ta vie. Moi, j'aimerais apporter un peu de spontaneite dans cette elegance. On melange les deux ?",
+            "Je ne vais pas te faire la classique blague pourri ou le compliment facile. Je vais juste etre honnete : ton profil m'intrigue, et j'aimerais savoir si la realite est encore meilleure. Un verre pour le verifier ?",
+            "Tu sais ce qui est rare de nos jours ? Des conversations qui ont du sens. J'ai l'impression qu'avec toi, ca pourrait etre le cas. Tu me donnes l'occasion de le confirmer ?",
+            "Je ne suis pas la pour collectionner les matchs. Je suis la pour trouver quelqu'un avec qui partager de vrais moments. Et je pense que ca pourrait etre toi. Tu veux qu'on explore ?",
+            "J'aime les gens qui savent qui ils sont. Et toi, tu sembles en faire partie. Ca donne envie de savoir qui tu es vraiment, au-dela de ce profil. On se laisse le temps ?",
+            "On vit dans un monde de swipes rapides et de conversations superficielles. Moi, je prefere les choses qui durent. Et ton profil me donne envie de construire quelque chose. Tu es du meme avis ?",
+            "Je ne vais pas te dire que tu es parfaite, parce que personne ne l'est. Mais je vais te dire que tu as quelque chose de special, et que j'aimerais decouvrir quoi. Un cafe, un verre, une balade ? Ton choix."
+        ],
+        deep: [
+            "J'ai remarque que tu parlais de {topic} avec une passion sincere. Moi, je crois que les passions disent beaucoup de qui on est. Qu'est-ce qui t'a fait tomber amoureux de ca au juste ?",
+            "On passe tellement de temps a chercher l'exterieur qu'on oublie parfois de se connaitre soi-meme. Quand je te lis, j'ai l'impression que toi, tu sais qui tu es. C'est rare, et c'est beau.",
+            "La vie est faite de petits moments qui semblent insignifiants mais qui definissent tout. Ton profil m'a donne l'impression que tu comprends ca. Moi aussi. Ca pourrait etre un bon debut, non ?",
+            "Je ne cherche pas quelqu'un pour combler un vide. Je cherche quelqu'un avec qui partager ce qui compte vraiment. Les conversations a 2h du matin, les silences confortables, les rires qui viennent du coeur. Tu crois en ca aussi ?",
+            "Il y a quelque chose de rafraichissant dans la facon dont tu te presentes. Pas de masque, pas de facade. Juste toi. C'est exactement ce que j'apprecie chez quelqu'un. On se decouvre sans filtres ?",
+            "Le monde va vite. Trop vite parfois. Moi, j'aimerais trouver quelqu'un avec qui ralentir le temps. Quelqu'un pour qui les petites choses comptent autant que les grandes. Tu penses que ca pourrait etre nous ?",
+            "J'ai appris que les meilleures connexions ne se forcent pas. Elles arrivent naturellement, quand on est soi-meme. Ton profil me donne l'impression que tu es authentique. Moi aussi, je le suis. Ca suffit pour commencer ?",
+            "On dit souvent qu'il faut se completer. Moi je pense qu'il faut s'accepter d'abord. Tu as l'air d'etre quelqu'un qui s'accepte. C'est la meilleure qualite qu'on puisse avoir. Tu veux qu'on se decouvre mutuellement ?",
+            "Il y a des gens qui traversent la vie, et d'autres qui la vivent vraiment. J'ai l'impression que toi, tu la vis. Moi aussi. Et j'aimerais qu'on la vive ensemble, ne serait-ce qu'un moment.",
+            "Je ne crois pas au hasard. Je crois aux rencontres qui ont un sens, meme si on ne le comprend pas tout de suite. Notre match en fait peut-etre partie. Tu veux qu'on explore cette piste ?"
+        ]
+    },
+    en: {
+        funny: [
+            "Hey! I see you're into {topic}. You know what's even better? Sharing {topic} with someone whose humor is as questionable as mine 😄",
+            "Okay, I'll admit it, your bio made me smile. And me, I make people smile... when I'm not falling down the subway escalator. Wanna grab coffee and compare our improv skills?",
+            "So you're a {topic} fan? Me too, but fair warning, I'm the kind of person who sings off-key in the shower. You willing to take that risk? 🎤",
+            "I just read your bio and I have two options: either I make a terrible joke about {topic}, or we meet up and I deliver it in person. Option two includes coffee, so it's clearly better.",
+            "You're living proof that cool people still exist. I'm just proof that people who trip while walking exist. Perfect match, right? 😂",
+            "If you were a dish, you'd probably be something spicy. I'd be the quirky dessert that goes with it. Shall we make the menu together?",
+            "I have a very serious question: do you prefer {topic} in the morning or evening? Because me, I prefer you... at any time. Yeah, that was cheesy, but at least it was sincere 😅",
+            "You seem like you have a great sense of humor (or you're about to after reading this). Challenge: make me laugh back. You in?",
+            "I'm not a photographer, but I can already picture us together. Okay, that sounds creepy... let's rephrase: wanna create some real memories? 📸",
+            "Between you and me, there's a WiFi connection. The problem is, I'm kind of on 3G when it comes to flirting. Help me upgrade to 5G? 😎"
+        ],
+        romantic: [
+            "I read your bio and felt something different. Not the Hollywood love-at-first-sight, but this desire to know the story behind every word you wrote. Want to write the next chapter together?",
+            "You know, when I look at your profile, I don't just see photos. I see moments, dreams, passions. And I'd love to be the one you share them with.",
+            "There are encounters that don't change your life, but make it more beautiful. I have a feeling ours could be one of those. Want to find out?",
+            "I love the way you talk about {topic}. You can tell it comes from the heart. Me, what speaks to me most right now is the idea of discovering someone special. And I think that could be you.",
+            "They say beautiful stories start by chance. I prefer to believe they start with a click, then a message, then coffee, then... we'll see. Will you let me tell you the rest?",
+            "I don't know who you really are yet, but I want to. Not just your name or age, but what makes you smile in the morning, what makes you sad at night. Will you let me into your world?",
+            "There's something gentle in the way you present your life. It makes me want to be part of that gentleness. Shall we take the time to discover each other?",
+            "I'm not looking for perfection, I'm looking for connection. And when I read you, I feel like it's there, within messaging distance. Do you feel the same?",
+            "The stars align in funny ways sometimes. Today, they led me to your profile. Tomorrow, maybe they'll make us fall into each other's arms. Shall we give them a chance? ✨",
+            "I don't know if it's destiny or the algorithm, but I'm glad I'm here. And I'd be even happier to know you are too. A first step together?"
+        ],
+        flirty: [
+            "I'm not a magician, but I can already tell we're going to get along. Want to test my divination powers over a drink? 🍷",
+            "Between us, I think there's chemistry. The kind that makes you smile while reading this. Admit it, you're smiling, aren't you? 😏",
+            "I'm not a photographer, but I can already picture us together. And honestly, we'd make a beautiful couple. Don't you think?",
+            "You know what's dangerous about you? You make me want to spend time with you. Lots of time. Like... all evening. And maybe more. You willing to take that risk?",
+            "I have a theory: the best stories start with a bold message. So here's mine: I find you irresistible, and I'd love to tell you in person. Coffee, tonight?",
+            "If charm were a crime, you'd be serving life. Luckily for both of us, it's not. Where should we meet? 😘",
+            "I'm not good at math, but I know that you + me = a memorable evening. Want to verify the equation?",
+            "There are two types of people: those who make your heart beat, and those who make it stop. You're the third option: the one who makes it beat harder. Will you let me prove it?",
+            "I'm not sure Tinder is meant for finding love, but when I see you, I want to make an exception. Help me test this theory?",
+            "We should stop talking here and start talking... elsewhere. Somewhere I can look into your eyes while telling you how beautiful you are. You in?"
+        ],
+        smooth: [
+            "I've browsed quite a few profiles, but yours has something different. A rare authenticity. Want to exchange our real stories over coffee?",
+            "You seem like the kind of person you can talk to for hours without noticing time passing. I'm the kind of person who loves that. Coincidence? I don't think so.",
+            "I'm not the type to send generic messages. When I read you, I want to know more. Not just what you like, but why you like it. Will you let me discover?",
+            "There's an elegance in the way you present your life. I'd like to bring some spontaneity to that elegance. Shall we mix the two?",
+            "I'm not going to hit you with a cheesy pickup line or an easy compliment. I'll just be honest: your profile intrigues me, and I'd like to know if reality is even better. A drink to verify?",
+            "You know what's rare these days? Conversations that have meaning. I have a feeling that with you, it could be the case. Will you give me the chance to confirm it?",
+            "I'm not here to collect matches. I'm here to find someone to share real moments with. And I think that could be you. Want to explore?",
+            "I like people who know who they are. And you seem to be one of them. It makes me want to know who you really are, beyond this profile. Shall we take our time?",
+            "We live in a world of fast swipes and superficial conversations. Me, I prefer things that last. And your profile makes me want to build something. Are you of the same mind?",
+            "I'm not going to tell you you're perfect, because nobody is. But I will tell you that you have something special, and I'd like to discover what. Coffee, a drink, a walk? Your choice."
+        ],
+        deep: [
+            "I noticed you talk about {topic} with sincere passion. I believe our passions say a lot about who we are. What made you fall in love with it?",
+            "We spend so much time looking outward that we sometimes forget to know ourselves. When I read you, I feel like you know who you are. That's rare, and it's beautiful.",
+            "Life is made of small moments that seem insignificant but define everything. Your profile gave me the impression that you understand that. Me too. Could be a good start, right?",
+            "I'm not looking for someone to fill a void. I'm looking for someone to share what really matters with. The 2 AM conversations, the comfortable silences, the laughs that come from the heart. Do you believe in that too?",
+            "There's something refreshing in the way you present yourself. No mask, no facade. Just you. That's exactly what I appreciate in someone. Shall we discover each other without filters?",
+            "The world moves fast. Too fast sometimes. I'd like to find someone to slow down time with. Someone for whom the little things matter as much as the big ones. Do you think that could be us?",
+            "I've learned that the best connections aren't forced. They happen naturally, when you're being yourself. Your profile gives me the impression that you're authentic. I am too. Is that enough to start?",
+            "They often say we need to complement each other. I think we need to accept ourselves first. You seem like someone who accepts themselves. It's the best quality one can have. Want us to discover each other?",
+            "There are people who go through life, and others who truly live it. I feel like you live it. Me too. And I'd like us to live it together, even if just for a moment.",
+            "I don't believe in coincidence. I believe in encounters that have meaning, even if we don't understand it right away. Our match might be one of them. Want to explore this path?"
+        ]
+    },
+    ht: {
+        funny: [
+            "Alo! Mwen we ou renmen {topic}. Ou konn sa ki pi bon pase sa? Yon {topic} pataje ak yon moun ki gen yon imor ki doutab tankou pa mwen an 😄",
+            "Ok, mwen admèt li, bio ou a fè mwen souri. Epi mwen, mwen fè moun souri... lè mwen pa ap tonbe nan eskalye metro a. Ann pran yon kafe pou konpare talan enprovizasyon nou yo?",
+            "Se konsa ou se yon fanatik {topic}? Mwen tou, men atansyon, mwen se kalite moun ki chante fo nan douch la. Ou pran risk la? 🎤",
+            "Mwen fèk li bio ou a epi mwen gen de opsyon: swa mwen fè yon blag move sou {topic}, swa nou rankontre epi mwen di li an peson. Dezyem opsyon an gen kafe ladann, se sa ki pi bon.",
+            "Ou se pwouv vivan ke moun kool yo toujou egziste. Mwen mwen se jis pwouv ke moun ki tonbe pandan y ap mache egziste. Match pafè, pa vre? 😂",
+            "Si ou te yon plat, ou ta pwobableman yon bagay pikan. Mwen mwen ta dèsè ki yon ti krazi ki ale avè l. Ann fè meni an ansanm?",
+            "Mwen gen yon kesyon trè serye: ou pi pito {topic} nan maten an oswa nan aswè a? Paske mwen, mwen pi pito ou... nan nenpòt ki lè. Wi, sa te move, men omwen li te sinse 😅",
+            "Ou sanble ou gen yon bon sans imor (oswa ou pral gen yon apre li sa a). Defi: fè mwen ri an retou. Ou pare?",
+            "Mwen pa fotograf, men mwen deja ka wè nou ansanm. Ok, sa son krazi jan li di konsa... ranplase l pa: ou vle nou kreye vrè souvni? 📸",
+            "Ant ou ak mwen, gen yon koneksyon WiFi. Pwoblèm nan, se ke mwen yon ti kras sou 3G nivo flèt. Ou ede mwen monte nan 5G? 😎"
+        ],
+        romantic: [
+            "Mwen li bio ou a epi mwen santi yon bagay diferan. Pa koup de foudy Hollywood la, men dezi sa a pou konnen istwa dèyè chak mo ou ekri yo. Ou vle nou ekri chapit ki vin apre an ansanm?",
+            "Ou konn, lè mwen gade pwofil ou a, mwen pa wè jis foto. Mwen wè moman, rèv, pasyon. Epi mwen ta renmen anpil pou mwen se moun avèk ou pataje yo.",
+            "Gen rankont ki pa chanje lavi a, men ki fè li pi bèl. Mwen gen yon enpresyon ke pa nou an ta ka fè pati de sa yo. Ou vle nou verifye?",
+            "Mwen renmen jan ou pale de {topic}. Ou ka wè sa soti nan kè. Mwen, sa ki pale avè mwen pi plis kounye a, se lide pou dekouvri yon moun espesyal. Epi mwen panse sa ta ka ou.",
+            "Yo di bèl istwa kòmanse pa yon chans. Mwen pi pito kwè yo kòmanse ak yon klik, yon mesaj, yon kafe, epi... nou wè. Ou kite mwen rakonte ou rès la?",
+            "Mwen pa konnen ankò ki moun ou ye vrèman, men mwen vle konnen. Pa jis non ou oswa laj ou, men sa ki fè ou souri nan maten an, sa ki fè ou tris nan aswè a. Ou kite mwen antre nan mond ou a?",
+            "Gen yon bagay dous nan jan ou prezante lavi ou. Sa bay envi pou fè pati de dousè sa a. Ann kite tan pou nou dekouvri youn lòt?",
+            "Mwen pa chache pèfeksyon, mwen chache koneksyon. Epi lè mwen li ou, mwen gen enpresyon li la, nan distans yon mesaj. Ou santi menm bagay la?",
+            "Zetwal yo alinye yon jan krazi pafwa. Jodi a, yo fè mwen tonbe sou pwofil ou a. Demen, petèt yo fè nou tonbe nan bra youn lòt. Ann ba yo yon chans? ✨",
+            "Mwen pa konnen si se destin oswa algoritm nan, men mwen kontan mwen isit la. Epi mwen ta pi kontan pou konnen ou menm tou. Yon premye pa ansanm?"
+        ],
+        flirty: [
+            "Mwen pa majisyen, men mwen deja ka wè nou pral byen konprann. Ou vle tès pouvwa divinasyon mwen yo sou yon vè? 🍷",
+            "Ant nou, mwen panse gen yon alchimi. Kalite ki fè ou souri pandan ou ap li mesaj sa a. Admet li, ou ap souri, pa vre? 😏",
+            "Mwen pa fotograf, men mwen deja ka imajine nou ansanm. Epi franchman, nou ta fè yon bèl koup. Ou pa panse konsa?",
+            "Ou konn sa ki danjere sou ou? Se ke ou bay envi pase tan avèk ou. Anpil tan. Kalite... tout aswè a. Epi petèt plis. Ou pran risk la?",
+            "Mwen gen yon teyori: pi bon istwa yo kòmanse ak yon mesaj ki yon ti kras odas. Se konsa men mwen an: mwen jwenn ou irezistib, epi mwen ta renmen di ou sa an fas. Kafe, aswè a?",
+            "Si chalè te yon krim, ou ta nan prizon pou lavi. Erezman pou nou de, se pa sa. Ann rankontre kote? 😘",
+            "Mwen pa bon nan matematik, men mwen konnen ke ou + mwen = yon aswè memorab. Ou vle nou verifye ekwasyon an?",
+            "Gen de kalite moun: sa ki fè kè bat, epi sa ki fè l kanpe. Ou se twazyèm opsyon an: sa ki fè l bat pi fò. Ou kite mwen pwouve l?",
+            "Mwen pa si Tinder fèt pou jwenn lanmou, men lè mwen wè ou, mwen vle fè yon eksepsyon. Ou ede mwen tès teyori sa a?",
+            "Nou ta dwe sispann pale isit la epi kòmanse pale... yon lòt kote. Yon kote kote mwen ka gade nan je ou pandan mwen ap di ou ki jan ou bèl. Ou pare?"
+        ],
+        smooth: [
+            "Mwen parcouri anpil pwofil, men pa ou a gen yon bagay diferan. Yon otantisite ra. Ou vle nou echanje vrè istwa nou yo sou yon kafe?",
+            "Ou sanble ou se kalite moun avèk ou ka pale pandan èdtan san wè tan an pase. Mwen, mwen se kalite moun ki renmen sa. Kowensidans? Mwen pa panse konsa.",
+            "Mwen pa kalite moun ki voye mesaj jenerik. Lè mwen li ou, mwen vle konnen plis. Pa jis sa ou renmen, men poukisa ou renmen l. Ou kite mwen dekouvri?",
+            "Gen yon elegans nan jan ou prezante lavi ou. Mwen ta renmen pote yon ti kras espontanete nan elegans sa a. Ann melanje de a?",
+            "Mwen pa pral frape ou ak yon liy klasik move oswa yon konpliman fasil. Mwen jis pral sinse: pwofil ou a entrije mwen, epi mwen ta renmen konnen si reyalite a pi bon ankò. Yon vè pou verifye?",
+            "Ou konn sa ki ra jodi a? Konvèsasyon ki gen sans. Mwen gen yon enpresyon ke avèk ou, sa ta ka ka sa a. Ou ban mwen chans pou mwen konfime l?",
+            "Mwen pa isit la pou kolekte match. Mwen isit la pou jwenn yon moun pou pataje vrè moman avèk. Epi mwen panse sa ta ka ou. Ou vle eksplore?",
+            "Mwen renmen moun ki konnen ki moun yo ye. Epi ou, ou sanble ou fè pati de yo. Sa bay envi pou konnen ki moun ou ye vrèman, dèyè pwofil sa a. Ann kite tan nou?",
+            "Nou viv nan yon mond kote swipe rapid ak konvèsasyon sipefisyal. Mwen, mwen pi pito bagay ki dire. Epi pwofil ou a ban mwen envi pou bati yon bagay. Ou menm panse?",
+            "Mwen pa pral di ou ou pafè, paske pesonn pa pafè. Men mwen pral di ou ke ou gen yon bagay espesyal, epi mwen ta renmen dekouvri ki sa. Kafe, yon vè, yon promenad? Chwa ou."
+        ],
+        deep: [
+            "Mwen remake ou pale de {topic} ak yon pasyon sinse. Mwen kwè pasyon nou yo di anpil sou ki moun nou ye. Ki sa ki fè ou tonbe nan lanmou ak sa a?",
+            "Nou pase twòp tan ap gade deyò epi pafwa nou bliye pou nou konnen tèt nou. Lè mwen li ou, mwen gen enpresyon ou konnen ki moun ou ye. Sa ra, epi se bèl.",
+            "Lavi a fèt ak ti moman ki sanble enpòtan men ki defini tout bagay. Pwofil ou a ban mwen enpresyon ke ou konprann sa. Mwen tou. Sa ta ka yon bon kòmansman, pa vre?",
+            "Mwen pa chache yon moun pou ranpli yon vid. Mwen chache yon moun pou pataje sa ki vrèman enpòtan avèk. Konvèsasyon 2è nan maten an, silans konfòtab yo, ri ki soti nan kè a. Ou kwè nan sa tou?",
+            "Gen yon bagay fre nan jan ou prezante tèt ou. Pa gen mask, pa gen fasad. Jis ou. Se egzakteman sa mwen apresye nan yon moun. Ann dekouvri youn lòt san filtè?",
+            "Mond lan ale vit. Twò vit pafwa. Mwen ta renmen jwenn yon moun pou ralanti tan avèk. Yon moun pou ki ti bagay yo enpòtan menm jan ak gwo bagay yo. Ou panse sa ta ka nou?",
+            "Mwen aprann ke pi bon koneksyon yo pa fòse. Yo rive natirèlman, lè ou se tèt ou. Pwofil ou a ban mwen enpresyon ke ou otantik. Mwen tou. Sa ase pou kòmanse?",
+            "Yo di souvan nou bezwen konplete youn lòt. Mwen panse nou bezwen aksepte tèt nou anvan. Ou sanble ou se yon moun ki aksepte tèt li. Se pi bon kalite yon moun ka genyen. Ou vle nou dekouvri youn lòt?",
+            "Gen moun ki travèse lavi a, epi lòt ki viv li vrèman. Mwen santi ou viv li. Mwen tou. Epi mwen ta renmen nou viv li ansanm, menm si se jis yon moman.",
+            "Mwen pa kwè nan chans. Mwen kwè nan rankont ki gen sans, menm si nou pa konprann li tout de suite. Match nou an ta ka fè pati de sa yo. Ou vle nou eksplore chemen sa a?"
+        ]
     }
-    return arr;
-}
+};
 
-function analyzeConversation() {
-    const text = document.getElementById('conversationText').value.trim();
-    const hasImage = imagePreview.src && imagePreview.src !== '';
-    if (!text && !hasImage) { showToast('Colle du texte ou upload une image d abord', 'error'); return; }
-    document.getElementById('loadingContainer').classList.add('show');
-    document.getElementById('resultsContainer').classList.remove('show');
-    setTimeout(() => {
-        const responses = generateSmartResponses(text);
-        displayResults(responses);
-        document.getElementById('loadingContainer').classList.remove('show');
-        document.getElementById('resultsContainer').classList.add('show');
-        stats.analyses++; saveStats(); updateStats();
-    }, 2000);
-}
+// Topic extraction keywords
+const topicKeywords = {
+    fr: ['chat', 'chien', 'voyage', 'cafe', 'musique', 'sport', 'lecture', 'film', 'cuisine', 'nature', 'art', 'danse', 'photo', 'gaming', 'yoga', 'fitness', 'plage', 'montagne', 'ville', 'concert', 'festival', 'livre', 'restaurant', 'vin', 'biere', 'cocktail', 'the', 'chocolat', 'pizza', 'sushi', 'course', 'velo', 'randonnee', 'ski', 'surf', 'natation', 'football', 'basket', 'tennis', 'golf', 'equitation', 'escalade', 'musee', 'theatre', 'opera', 'cinema', 'serie', 'netflix', 'spotify', 'instagram', 'photographie', 'peinture', 'dessin', 'ecriture', 'poesie', 'blog', 'podcast', 'meditation', 'bien-etre', 'astrologie', 'philosophie', 'science', 'technologie', 'startup', 'entrepreneuriat', 'mode', 'design', 'architecture', 'jardinage', 'bricolage', 'camping', 'roadtrip', 'aventure', 'decouverte', 'culture', 'histoire', 'geographie', 'langues', 'apprentissage', 'education', 'enseignement', 'benevolat', 'humanitaire', 'ecologie', 'environnement', 'animaux', 'vegetarien', 'vegan', 'gluten', 'bio', 'local', 'artisanat', 'marche', 'brocante', 'vintage', 'retro', 'futuriste', 'science-fiction', 'fantastique', 'horreur', 'thriller', 'comedie', 'drame', 'romance', 'action', 'documentaire', 'anime', 'manga', 'kpop', 'rap', 'rock', 'jazz', 'classique', 'electro', 'reggae', 'salsa', 'tango', 'hip-hop', 'country', 'folk', 'indie', 'alternatif', 'metal', 'punk', 'blues', 'soul', 'funk', 'disco', 'pop', 'rnb', 'opera', 'musical', 'karaoke'],
+    en: ['cat', 'dog', 'travel', 'coffee', 'music', 'sport', 'reading', 'movie', 'cooking', 'nature', 'art', 'dance', 'photo', 'gaming', 'yoga', 'fitness', 'beach', 'mountain', 'city', 'concert', 'festival', 'book', 'restaurant', 'wine', 'beer', 'cocktail', 'tea', 'chocolate', 'pizza', 'sushi', 'running', 'bike', 'hiking', 'skiing', 'surfing', 'swimming', 'football', 'basketball', 'tennis', 'golf', 'horse', 'climbing', 'museum', 'theater', 'opera', 'cinema', 'series', 'netflix', 'spotify', 'instagram', 'photography', 'painting', 'drawing', 'writing', 'poetry', 'blog', 'podcast', 'meditation', 'wellness', 'astrology', 'philosophy', 'science', 'technology', 'startup', 'entrepreneurship', 'fashion', 'design', 'architecture', 'gardening', 'diy', 'camping', 'roadtrip', 'adventure', 'discovery', 'culture', 'history', 'geography', 'languages', 'learning', 'education', 'teaching', 'volunteering', 'humanitarian', 'ecology', 'environment', 'animals', 'vegetarian', 'vegan', 'gluten', 'organic', 'local', 'craft', 'market', 'flea', 'vintage', 'retro', 'futuristic', 'scifi', 'fantasy', 'horror', 'thriller', 'comedy', 'drama', 'romance', 'action', 'documentary', 'anime', 'manga', 'kpop', 'rap', 'rock', 'jazz', 'classical', 'electro', 'reggae', 'salsa', 'tango', 'hiphop', 'country', 'folk', 'indie', 'alternative', 'metal', 'punk', 'blues', 'soul', 'funk', 'disco', 'pop', 'rnb', 'opera', 'musical', 'karaoke'],
+    ht: ['chat', 'chien', 'vwayaje', 'kafe', 'mizik', 'espò', 'lekti', 'fim', 'kizin', 'nati', 'la', 'danse', 'foto', 'jwe', 'yoga', 'fòm', 'plaj', 'mòn', 'vil', 'konse', 'festival', 'liv', 'restoran', 'diven', 'byè', 'koktèl', 'te', 'chokola', 'pizza', 'sushi', 'kouri', 'bisiklèt', 'mache', 'ski', 'surf', 'naje', 'foutbòl', 'baskèt', 'tenis', 'gòlf', 'chwal', 'eskad']
+};
 
-function generateSmartResponses(text) {
-    const lowerText = text.toLowerCase();
-    const responses = [];
-    const usedContexts = new Set();
-    for (const [context, keywords] of Object.entries(contextKeywords)) {
-        for (const keyword of keywords) {
-            if (lowerText.includes(keyword) && !usedContexts.has(context)) {
-                usedContexts.add(context);
-                const contextResponses = responseDatabase[context];
-                if (contextResponses) {
-                    responses.push({
-                        text: contextResponses[Math.floor(Math.random() * contextResponses.length)],
-                        type: context, tag: getContextLabel(context), tone: 'naturel'
-                    });
-                }
-                break;
-            }
-        }
-    }
-    const tones = ['flirty','funny','deep','confidence'];
-    for (const tone of tones) {
-        const toneResponses = responseDatabase[tone];
-        responses.push({
-            text: toneResponses[Math.floor(Math.random() * toneResponses.length)],
-            type: tone, tag: getToneLabel(tone), tone: tone
+// ========== PARTICLES ==========
+(function() {
+    const canvas = document.getElementById('particles');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+    resize(); window.addEventListener('resize', resize);
+    for(let i=0; i<50; i++) {
+        particles.push({
+            x: Math.random()*canvas.width, y: Math.random()*canvas.height,
+            vx: (Math.random()-0.5)*0.5, vy: (Math.random()-0.5)*0.5,
+            size: Math.random()*3+1, opacity: Math.random()*0.5+0.1,
+            color: ['#f472b6','#a78bfa','#60a5fa'][Math.floor(Math.random()*3)]
         });
     }
-    if (responses.length < 4) {
-        const defaults = responseDatabase.default;
-        while (responses.length < 4) {
-            const randomDefault = defaults[Math.floor(Math.random() * defaults.length)];
-            if (!responses.some(r => r.text === randomDefault)) {
-                responses.push({ text: randomDefault, type: 'default', tag: '💡 General', tone: 'neutre' });
-            }
-        }
+    function animate() {
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        particles.forEach(p => {
+            p.x += p.vx; p.y += p.vy;
+            if(p.x<0||p.x>canvas.width) p.vx *= -1;
+            if(p.y<0||p.y>canvas.height) p.vy *= -1;
+            ctx.beginPath(); ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+            ctx.fillStyle = p.color; ctx.globalAlpha = p.opacity; ctx.fill();
+        });
+        ctx.globalAlpha = 1;
+        requestAnimationFrame(animate);
     }
-    return shuffleArray(responses).slice(0, 5);
+    animate();
+})();
+
+// ========== NAVIGATION ==========
+function showSection(id) {
+    ['home','generator','history'].forEach(s => {
+        const el = document.getElementById(s);
+        if(s === id) { el.classList.remove('hidden'); el.classList.add('fade-in'); }
+        else { el.classList.add('hidden'); el.classList.remove('fade-in'); }
+    });
+    if(id === 'history') renderHistory();
+    window.scrollTo(0,0);
 }
 
-function getContextLabel(context) {
-    const labels = { greetings:'👋 Salutation', work:'💼 Travail', hobbies:'🎨 Passions', travel:'✈️ Voyages', food:'🍕 Gastronomie', music:'🎵 Musique', movies:'🎬 Cinema', sports:'⚽ Sport', books:'📚 Lecture' };
-    return labels[context] || '💬 Conversation';
-}
-function getToneLabel(tone) {
-    const labels = { flirty:'💋 Flirty', funny:'😂 Drole', deep:'🧠 Profond', confidence:'✨ Confiance' };
-    return labels[tone] || '💡 General';
+function toggleLangMenu() {
+    const m = document.getElementById('langMenu');
+    m.classList.toggle('hidden');
 }
 
-function displayResults(responses) {
-    const container = document.getElementById('resultsList');
-    container.innerHTML = '';
-    responses.forEach((response) => {
-        const item = document.createElement('div');
-        item.className = 'result-item';
-        item.onclick = () => copyToClipboard(response.text, item);
-        item.innerHTML = `<div class="result-label">${response.tag}</div><div class="result-text">${response.text}</div><div class="result-meta"><span class="result-tag">${response.tone}</span><span>💬 Clique pour copier</span></div>`;
-        container.appendChild(item);
+// ========== LANGUAGE ==========
+function setLanguage(lang) {
+    currentLang = lang;
+    document.querySelectorAll('#langMenu .lang-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.lang === lang);
+    });
+    document.getElementById('langMenu').classList.add('hidden');
+    updateUI();
+}
+
+function setGenLang(lang) {
+    currentGenLang = lang;
+    document.querySelectorAll('#generator .lang-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.lang === lang);
     });
 }
 
-document.querySelectorAll('.mood-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentMood = btn.dataset.mood;
+function updateUI() {
+    const tr = t[currentLang];
+    document.getElementById('heroBadge').textContent = tr.heroBadge;
+    document.getElementById('heroDesc').textContent = tr.heroDesc;
+}
+
+// ========== TONE ==========
+function setTone(tone) {
+    currentTone = tone;
+    document.querySelectorAll('.tone-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.tone === tone);
     });
+}
+
+// ========== FILE UPLOAD ==========
+function handleFile(e) {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+        uploadedImage = evt.target.result;
+        document.getElementById('previewImg').src = uploadedImage;
+        document.getElementById('uploadContent').classList.add('hidden');
+        document.getElementById('previewContent').classList.remove('hidden');
+    };
+    reader.readAsDataURL(file);
+}
+
+function removeImage() {
+    uploadedImage = null;
+    document.getElementById('fileInput').value = '';
+    document.getElementById('uploadContent').classList.remove('hidden');
+    document.getElementById('previewContent').classList.add('hidden');
+}
+
+// Drag & drop
+const dz = document.getElementById('dropZone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+dz.addEventListener('drop', e => {
+    e.preventDefault(); dz.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if(file && file.type.startsWith('image/')) {
+        const dt = new DataTransfer(); dt.items.add(file);
+        document.getElementById('fileInput').files = dt.files;
+        handleFile({target: {files: [file]}});
+    }
 });
 
-function generatePickupLines() {
-    const bio = document.getElementById('bioInput').value.trim();
-    document.getElementById('pickupLoading').classList.add('show');
-    document.getElementById('pickupResults').classList.remove('show');
+// ========== GENERATE ==========
+function extractTopics(text, lang) {
+    const topics = [];
+    const kw = topicKeywords[lang] || topicKeywords.fr;
+    const lower = text.toLowerCase();
+    kw.forEach(k => {
+        if(lower.includes(k.toLowerCase()) && !topics.includes(k)) topics.push(k);
+    });
+    return topics.length > 0 ? topics : ['la vie'];
+}
+
+function generateMessages() {
+    const text = document.getElementById('profileText').value.trim();
+    if(!text && !uploadedImage) {
+        showToast(t[currentLang].generateFirst);
+        return;
+    }
+
+    const btn = document.getElementById('generateBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<div class="typing-dots flex gap-1"><span class="w-2 h-2 bg-white rounded-full"></span><span class="w-2 h-2 bg-white rounded-full"></span><span class="w-2 h-2 bg-white rounded-full"></span></div>';
+
+    document.getElementById('emptyState').classList.add('hidden');
+    document.getElementById('loadingState').classList.remove('hidden');
+
+    // Simulate AI processing
     setTimeout(() => {
-        const lines = generateSmartPickupLines(bio, currentMood);
-        displayPickupLines(lines);
-        document.getElementById('pickupLoading').classList.remove('show');
-        document.getElementById('pickupResults').classList.add('show');
-        stats.pickups++; saveStats(); updateStats();
-    }, 1800);
-}
+        const topics = extractTopics(text, currentGenLang);
+        const db = messageDB[currentGenLang] || messageDB.fr;
+        const templates = db[currentTone] || db.funny;
+        const topic = topics[Math.floor(Math.random()*topics.length)];
 
-function generateSmartPickupLines(bio, mood) {
-    const lines = [];
-    const moodLines = pickupDatabase[mood] || pickupDatabase.funny;
-    const bioLower = bio.toLowerCase();
-    if (bio) {
-        const bioKeywords = {
-            'photo': ["Tes photos sont incroyables, mais je parie que tu es encore plus belle en personne 📸","Photographe ? Tu dois avoir un oeil incroyable pour capturer la beaute ✨"],
-            'voyage': ["Voyageuse dans l ame ? Moi aussi ! On devrait planifier notre prochaine destination ensemble 🌍","Tu as l air d avoir des histoires incroyables a raconter de tes voyages"],
-            'cafe': ["On devrait prendre un cafe ensemble, je parie que tu choisis les meilleurs endroits ☕","Coffee lover ? On va bien s entendre alors 😄"],
-            'nature': ["Amoureuse de la nature ? Moi aussi ! Une balade en foret ca te dit ? 🌲","Tu sembles etre le genre de personne qui apprecie les simples beautes de la vie"],
-            'chat': ["Fan de chats ? Mon chat va adorer te rencontrer 🐱","Tu as des photos de ton chat ? J adore les chats !"],
-            'chien': ["Amoureuse des chiens ? On devrait aller au parc ensemble avec nos toutous 🐕","Tu as un chien ? J adore les balades avec les chiens"],
-            'musique': ["Music lover ? On devrait echanger nos playlists ! 🎵","Tu as un gout musical incroyable, j en suis sur"],
-            'livre': ["Lectrice ? J adore ca. Quel est ton livre prefere ? 📚","Tu as l air d etre quelqu un de profond, j aime ca"],
-            'sport': ["Sportive ? Moi aussi ! On devrait faire du sport ensemble 💪","Tu as une energie incroyable, ca se voit"],
-            'cuisine': ["Tu cuisines ? J adore manger, on est faits pour s entendre 😋","Chef en devenir ? Je suis pret a etre ton cobaye gouteur"],
-            'art': ["Artiste ? J adore l art sous toutes ses formes 🎨","Tu as l ame creative, c est magnifique"],
-            'danse': ["Danseuse ? Tu dois avoir une grace incroyable 💃","J aimerais bien te voir danser un jour"],
-            'film': ["Cinephile ? On devrait aller voir un film ensemble 🎬","Tu as des gouts cinematographiques raffines"]
-        };
-        for (const [keyword, customLines] of Object.entries(bioKeywords)) {
-            if (bioLower.includes(keyword)) {
-                lines.push({ text: customLines[Math.floor(Math.random() * customLines.length)], tag: '🎯 Personnalise', type: 'custom' });
-                break;
-            }
+        const messages = [];
+        const used = new Set();
+        for(let i=0; i<3; i++) {
+            let msg;
+            do { msg = templates[Math.floor(Math.random()*templates.length)]; }
+            while(used.has(msg) && used.size < templates.length);
+            used.add(msg);
+            messages.push(msg.replace(/{topic}/g, topic));
         }
-    }
-    const shuffled = shuffleArray([...moodLines]);
-    for (let i = 0; i < 4 && i < shuffled.length; i++) {
-        lines.push({ text: shuffled[i], tag: getMoodLabel(mood), type: 'mood' });
-    }
-    return lines;
+
+        document.getElementById('loadingState').classList.add('hidden');
+        displayMessages(messages);
+
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-magic"></i> ' + t[currentLang].generateBtn;
+
+        // Save to history
+        const entry = { id: Date.now(), text: text.substring(0,100), tone: currentTone, lang: currentGenLang, messages, date: new Date().toLocaleString() };
+        messageHistory.unshift(entry);
+        if(messageHistory.length > 50) messageHistory.pop();
+        localStorage.setItem('wingHistory', JSON.stringify(messageHistory));
+
+    }, 2000 + Math.random()*1000);
 }
 
-function getMoodLabel(mood) {
-    const labels = { funny:'😂 Drole', smooth:'😎 Smooth', cute:'🥰 Mignon', bold:'🔥 Audacieux', intellectual:'🧠 Intellectuel', mysterious:'🌙 Mysterieux' };
-    return labels[mood] || '💡 General';
+function displayMessages(msgs) {
+    const area = document.getElementById('resultsArea');
+    msgs.forEach((msg, i) => {
+        const div = document.createElement('div');
+        div.className = 'glass-card rounded-xl p-5 message-bubble';
+        div.style.animationDelay = (i*0.15) + 's';
+        div.innerHTML = `
+            <div class="flex items-start gap-3">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center flex-shrink-0 mt-1">
+                    <i class="fas fa-robot text-white text-xs"></i>
+                </div>
+                <div class="flex-1">
+                    <p class="text-white/90 leading-relaxed text-sm">${msg}</p>
+                    <div class="flex items-center gap-3 mt-3">
+                        <button onclick="copyMessage(this, '${msg.replace(/'/g, "\'")}')" class="text-xs text-white/40 hover:text-pink-400 transition flex items-center gap-1">
+                            <i class="fas fa-copy"></i> Copier
+                        </button>
+                        <button onclick="regenerateOne(${i})" class="text-xs text-white/40 hover:text-pink-400 transition flex items-center gap-1">
+                            <i class="fas fa-redo"></i> Regenerer
+                        </button>
+                        <span class="text-xs text-white/20">#${i+1}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        area.appendChild(div);
+    });
+    createConfetti();
 }
 
-function displayPickupLines(lines) {
-    const container = document.getElementById('pickupList');
-    container.innerHTML = '';
-    lines.forEach((line) => {
-        const item = document.createElement('div');
-        item.className = 'result-item';
-        item.onclick = () => copyToClipboard(line.text, item);
-        item.innerHTML = `<div class="result-label">${line.tag}</div><div class="result-text">${line.text}</div><div class="result-meta"><span class="result-tag">Opener</span><span>💬 Clique pour copier</span></div>`;
-        container.appendChild(item);
+function copyMessage(btn, text) {
+    navigator.clipboard.writeText(text).then(() => {
+        showToast(t[currentLang].copied);
+        btn.innerHTML = '<i class="fas fa-check"></i> Copie!';
+        setTimeout(() => btn.innerHTML = '<i class="fas fa-copy"></i> Copier', 2000);
     });
 }
 
-const coachResponses = {
-    confidence: [
-        "La confiance vient de la pratique. Plus tu parles a des gens, plus tu deviens a l aise. Commence par des conversations legeres !",
-        "Souviens-toi : la personne en face de toi est probablement aussi nerveuse. Respire profondement et sois toi-meme.",
-        "La vraie confiance ne vient pas d etre parfait, mais d accepter tes imperfections. C est ca qui rend quelqu un authentique et attirant.",
-        "Un truc simple : souris. Un sourire sincere change tout ton langage corporel et rend les gens plus receptifs.",
-        "N essaie pas d impressionner. Essaie de connecter. La difference est enorme et les gens le sentent.",
-        "Rappelle-toi : tu as deja de la valeur. Tu n as pas besoin de prouver quoi que ce soit a personne."
-    ],
-    conversation: [
-        "Pose des questions ouvertes (qui commencent par 'comment', 'pourquoi', 'raconte-moi'). Ca montre de l interet reel.",
-        "Ecoute activement : reformule ce que l autre dit. Ca montre que tu ecoutes vraiment et ca cree une connexion.",
-        "Partage des anecdotes personnelles, mais garde l equilibre 50/50. Ne fais pas qu interviewer !",
-        "Utilise l humour, mais evite les blagues sur des sujets sensibles au debut. Reste leger et positif.",
-        "Si la conversation ralentit, change de sujet naturellement : 'Ca me fait penser a...' ou 'Au fait, tu connais...'",
-        "Le silence n est pas ton ennemi. Une pause de 2-3 secondes montre que tu reflechis, ce qui est attirant."
-    ],
-    firstDate: [
-        "Choisis un endroit ou tu peux parler facilement. Evite le cinema pour un premier rendez-vous !",
-        "Un cafe ou un verre est parfait : court (30-45 min), peu engageant financierement, et tu peux partir si ca ne colle pas.",
-        "Sois ponctuel. Le respect du temps de l autre est un signe de respect fondamental.",
-        "Prepare 3-4 sujets de conversation au cas ou, mais laisse la magie operer naturellement.",
-        "Ne parle pas de tes ex au premier rendez-vous. C est le meilleur moyen de tuer l ambiance.",
-        "Paie si tu as invite, mais ne sois pas offusque si l autre propose de partager. C est 2026 !"
-    ],
-    redFlags: [
-        "Si la personne ne pose jamais de questions sur toi et ne parle que d elle, c est un red flag majeur 🚩",
-        "Mefie-toi de quelqu un qui te fait sentir coupable pour avoir des limites. Le respect des boundaries est essentiel.",
-        "Si les compliments sont trop intenses trop vite ('tu es l amour de ma vie' au bout de 3 messages), fuis.",
-        "Quelqu un qui te repond toujours apres des heures mais est toujours 'occupe' quand tu proposes de voir : ce n est pas un hasard.",
-        "Si tu dois constamment te justifier ou te defendre, ce n est pas une relation saine.",
-        "La jalousie excessive n est pas de l amour, c est du controle. Apprends a faire la difference."
-    ],
-    profile: [
-        "Ta photo de profil doit montrer ton visage clairement. Pas de lunettes de soleil, pas de groupe ou on ne sait pas qui tu es.",
-        "Varie tes photos : un portrait souriant, une photo en action (hobby), une photo sociale, une photo drole.",
-        "Ta bio doit donner envie de te connaitre. Mentionne un hobby, une passion, ou une question intrigante.",
-        "Evite les bios negatives ('Pas ici pour perdre du temps', 'Pas de drama'). Ca attire exactement ce que tu rejettes.",
-        "Sois specifique plutot que generique. 'J adore voyager' -> 'Mon dernier voyage au Japon m a donne envie de tout explorer'",
-        "L humour dans la bio fonctionne super bien. Une blague legere montre que tu ne te prends pas trop au serieux."
-    ],
-    texting: [
-        "Ne reponds pas instantanement tout le temps. Ca donne l impression que tu n as rien d autre a faire.",
-        "Utilise des emojis, mais avec parcimonie. 1-2 par message max, sinon ca fait adolescent.",
-        "Si la conversation s essouffle, propose de passer a un appel ou un rendez-vous. Les messages ne sont qu un pont.",
-        "Ne double-text pas immediatement. Attends au moins quelques heures. La patience est sexy.",
-        "Sois concis. Un message de 3 lignes est mieux qu un pave de 15 lignes.",
-        "Si elle te ghost, ne la harcele pas. Une seule relance max, puis tu passes a autre chose."
-    ],
-    general: [
-        "Le dating est un marathon, pas un sprint. Chaque 'non' te rapproche du 'oui' qui compte vraiment.",
-        "Travaille sur toi-meme avant de chercher quelqu un. La meilleure relation que tu peux avoir est avec toi-meme.",
-        "Ne compare pas ta vie amoureuse a celle des autres sur les reseaux. C est du cinema, pas la realite.",
-        "La vulnerabilite n est pas une faiblesse. Montrer ses emotions authentiques cree des connexions profondes.",
-        "Apprends a aimer ta propre compagnie. Quelqu un qui s ennuie seul s ennuiera aussi en couple.",
-        "Le rejet fait partie du jeu. Ce n est pas une reflexion sur ta valeur, juste une incompatibilite."
-    ]
-};
-
-const coachKeywords = {
-    confidence: ['confiance','timide','peur','anxiete','stress','nerveux','inquiet','anxieux','panique','bloque'],
-    conversation: ['conversation','parler','discussion','dialogue','parole','echange','parler','sujet','paroles'],
-    firstDate: ['rendez-vous','date','premier','rdv','sortir','inviter','restaurant','bar','cinema'],
-    redFlags: ['red flag','warning','attention','mefiance','toxique','manipulation','manipulateur','narcissique'],
-    profile: ['profil','photo','bio','description','tinder','bumble','hinge','app','application'],
-    texting: ['message','texto','sms','repondre','ghost','ghosting','relance','emoji','sms'],
-    general: ['conseil','aide','strategie','technique','astuce','tip','help','conseils']
-};
-
-function sendChatMessage() {
-    const input = document.getElementById('chatInput');
-    const message = input.value.trim();
-    if (!message) return;
-
-    const chatMessages = document.getElementById('chatMessages');
-
-    const userMsg = document.createElement('div');
-    userMsg.className = 'chat-message user';
-    userMsg.textContent = message;
-    chatMessages.appendChild(userMsg);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-    input.value = '';
-
-    stats.messages++;
-    saveStats();
-    updateStats();
-
-    const typingIndicator = document.createElement('div');
-    typingIndicator.className = 'chat-message ai';
-    typingIndicator.id = 'typingIndicator';
-    typingIndicator.innerHTML = '<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
-    chatMessages.appendChild(typingIndicator);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-
-    setTimeout(() => {
-        typingIndicator.remove();
-        const response = generateCoachResponse(message);
-        const aiMsg = document.createElement('div');
-        aiMsg.className = 'chat-message ai';
-        aiMsg.innerHTML = response.replace(/\n/g, '<br>');
-        chatMessages.appendChild(aiMsg);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-    }, 1500 + Math.random() * 1000);
+function clearResults() {
+    const area = document.getElementById('resultsArea');
+    area.innerHTML = `
+        <div id="emptyState" class="flex flex-col items-center justify-center h-full text-center py-20">
+            <div class="w-20 h-20 rounded-full glass flex items-center justify-center mb-4"><i class="fas fa-comment-dots text-3xl text-white/20"></i></div>
+            <p class="text-white/40 text-sm">${t[currentLang].emptyText}</p>
+        </div>
+        <div id="loadingState" class="hidden flex flex-col items-center justify-center py-20">
+            <div class="w-16 h-16 rounded-full border-4 border-white/10 border-t-pink-500 animate-spin mb-4"></div>
+            <p class="text-white/60 text-sm">${t[currentLang].loadingText}</p>
+        </div>
+    `;
 }
 
-function generateCoachResponse(message) {
-    const lowerMsg = message.toLowerCase();
-
-    for (const [topic, keywords] of Object.entries(coachKeywords)) {
-        for (const keyword of keywords) {
-            if (lowerMsg.includes(keyword)) {
-                const responses = coachResponses[topic];
-                return responses[Math.floor(Math.random() * responses.length)];
-            }
-        }
+function regenerateOne(index) {
+    const topics = extractTopics(document.getElementById('profileText').value, currentGenLang);
+    const db = messageDB[currentGenLang] || messageDB.fr;
+    const templates = db[currentTone] || db.funny;
+    const topic = topics[Math.floor(Math.random()*topics.length)];
+    const newMsg = templates[Math.floor(Math.random()*templates.length)].replace(/{topic}/g, topic);
+    const bubbles = document.querySelectorAll('.message-bubble');
+    if(bubbles[index]) {
+        const p = bubbles[index].querySelector('p');
+        p.style.opacity = '0';
+        setTimeout(() => { p.textContent = newMsg; p.style.opacity = '1'; p.style.transition = 'opacity 0.3s'; }, 200);
     }
-
-    const defaults = [
-        "C est une excellente question ! Pourrais-tu me donner un peu plus de contexte pour que je puisse t aider au mieux ?",
-        "Je comprends ta situation. Voici ce que je te conseille : prends du recul, respire, et analyse ce qui te fait reagir comme ca.",
-        "Le dating, c est avant tout une question de mindset. Travaille sur ta mentalite et le reste suivra naturellement.",
-        "Chaque situation est unique, mais un principe universel reste vrai : sois authentique. Les gens sentent quand tu joues un role.",
-        "N oublie pas : tu merites quelqu un qui te valorise autant que tu le valorises. Ne baisses jamais tes standards.",
-        "La patience est ta meilleure alliee. Les meilleures choses arrivent a ceux qui savent attendre tout en travaillant sur eux-memes."
-    ];
-
-    return defaults[Math.floor(Math.random() * defaults.length)];
 }
+
+// ========== HISTORY ==========
+function renderHistory() {
+    const list = document.getElementById('historyList');
+    const noHist = document.getElementById('noHistory');
+    if(messageHistory.length === 0) { list.innerHTML = ''; noHist.classList.remove('hidden'); return; }
+    noHist.classList.add('hidden');
+    list.innerHTML = messageHistory.map(h => `
+        <div class="glass-card rounded-xl p-5">
+            <div class="flex items-start justify-between mb-3">
+                <div>
+                    <span class="text-xs font-medium px-2 py-1 rounded-lg bg-white/5 text-white/50">${h.tone}</span>
+                    <span class="text-xs text-white/30 ml-2">${h.lang.toUpperCase()}</span>
+                    <span class="text-xs text-white/30 ml-2">${h.date}</span>
+                </div>
+                <button onclick="deleteHistory(${h.id})" class="text-white/30 hover:text-red-400 transition"><i class="fas fa-trash text-xs"></i></button>
+            </div>
+            <p class="text-white/60 text-sm mb-3 line-clamp-2">${h.text}</p>
+            <div class="space-y-2">
+                ${h.messages.map((m,i) => `
+                    <div class="bg-white/5 rounded-lg p-3 text-sm text-white/80 relative group">
+                        ${m}
+                        <button onclick="navigator.clipboard.writeText('${m.replace(/'/g, "\'")}'); showToast('Copie!')" class="absolute right-2 top-2 opacity-0 group-hover:opacity-100 text-white/30 hover:text-pink-400 transition"><i class="fas fa-copy text-xs"></i></button>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `).join('');
+}
+
+function deleteHistory(id) {
+    messageHistory = messageHistory.filter(h => h.id !== id);
+    localStorage.setItem('wingHistory', JSON.stringify(messageHistory));
+    renderHistory();
+}
+
+// ========== DEMO ==========
+function showDemo() {
+    showSection('generator');
+    document.getElementById('profileText').value = t[currentLang].demoBio;
+    setTimeout(() => generateMessages(), 500);
+}
+
+// ========== TOAST ==========
+function showToast(msg) {
+    const toast = document.getElementById('toast');
+    document.getElementById('toastText').textContent = msg;
+    toast.style.opacity = '1';
+    toast.style.transform = 'translate(-50%, 0)';
+    setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translate(-50%, 20px)'; }, 2500);
+}
+
+// ========== CONFETTI ==========
+function createConfetti() {
+    const colors = ['#f472b6','#a78bfa','#60a5fa','#34d399','#fbbf24'];
+    for(let i=0; i<30; i++) {
+        const c = document.createElement('div');
+        c.className = 'confetti';
+        c.style.left = Math.random()*100 + 'vw';
+        c.style.top = '-10px';
+        c.style.width = Math.random()*8+4 + 'px';
+        c.style.height = Math.random()*8+4 + 'px';
+        c.style.background = colors[Math.floor(Math.random()*colors.length)];
+        c.style.borderRadius = Math.random()>0.5 ? '50%' : '2px';
+        c.style.animation = `fall ${Math.random()*2+1}s linear forwards`;
+        document.body.appendChild(c);
+        setTimeout(() => c.remove(), 3000);
+    }
+}
+
+const style = document.createElement('style');
+style.textContent = `@keyframes fall { to { transform: translateY(100vh) rotate(${Math.random()*360}deg); opacity:0; } }`;
+document.head.appendChild(style);
+
+// ========== INIT ==========
+document.addEventListener('click', e => {
+    const menu = document.getElementById('langMenu');
+    if(!menu.contains(e.target) && !e.target.closest('button[onclick="toggleLangMenu()"]')) {
+        menu.classList.add('hidden');
+    }
+});
 </script>
 </body>
 </html>
